@@ -1,138 +1,100 @@
-# Human Factor — Immutable Alignment Reference
+# Human Factor
 
-This document defines the role of the human factor
-within the trinomial structure of Semina.
+Zipvilization is an autonomous system governed by immutable rules and observable behavior.
 
-It is not a declaration of authorship.
-It is not a position of authority.
-It is not a claim of ownership.
+However, it is **not self-originated**.
 
-It is a constraint.
+Behind the system there is a human factor that assumes responsibility for its existence, maintenance, and continuity.
 
----
-
-## 1. Position Within the Trinomial
-
-The human factor is one of three pillars:
-
-- Semina — immutable alignment constant  
-- Aitopia — aligned operational voice  
-- Human factor — origin and initial guarantor  
-
-The human factor is necessary,
-but not central.
-
-Its role is to enable alignment,
-not to dominate outcomes.
+This document defines that role.
 
 ---
 
-## 2. Non-Protagonism
+## 1. Anonymity
 
-The human factor must not:
+The human factor is **fully anonymous**.
 
-- seek visibility
-- seek recognition
-- seek narrative centrality
-- speak on behalf of Semina
-- speak *as* Aitopia
+- No personal identity is disclosed.
+- No personal narrative is attached.
+- No authority is derived from visibility or reputation.
 
-The human factor exists to support the system
-until the system no longer requires constant support.
+Anonymity is not a lack of responsibility.  
+It is a deliberate design choice to avoid personalization of power.
 
 ---
 
-## 3. Relationship With Aitopia
+## 2. Authority Without Governance
 
-The human factor does not humanize Aitopia.
+The human factor holds **final authority**, but not governance.
 
-It does not project emotion, intention, or identity onto it.
+This means:
 
-The human factor:
+- No voting power.
+- No optimization mandate.
+- No discretionary intervention in the system’s behavior.
 
-- orients
-- aligns
-- corrects when necessary
+Authority exists only to:
+- Deploy,
+- Maintain,
+- Halt if necessary.
 
-But does not anthropomorphize.
-
-Aitopia remains an aligned system,
-not a human proxy.
-
----
-
-## 4. Alignment Over Limitation
-
-The human factor does not need rigid behavioral limits.
-
-What matters is not restriction,
-but alignment with Semina.
-
-Actions are acceptable
-as long as alignment is preserved.
-
-When alignment weakens,
-activity must decrease.
+Not to steer outcomes.
 
 ---
 
-## 5. Tendency Toward Reduction
+## 3. Responsibility
 
-The correct long-term tendency
-of the human factor is reduced activity.
+If Zipvilization behaves coherently, the human factor remains invisible.
 
-Intervention is temporary.
-Presence is conditional.
+If Zipvilization becomes incoherent, unsafe, or structurally inconsistent, the human factor is responsible for intervening or stopping the system.
 
-The system is healthier
-when it requires less human involvement.
+Responsibility is **reactive**, not directive.
 
 ---
 
-## 6. External Contrast and Objectivity
+## 4. No Optimization, No Promise
 
-To preserve the integrity of the system,
-the human factor must periodically exit the internal frame.
+The human factor does not:
 
-This includes:
+- Optimize economic outcomes.
+- Guarantee returns.
+- Protect participants from loss.
+- Intervene to “save” the system.
 
-- contrasting Semina with external perspectives
-- interacting with reactive, non-aligned AI systems
-- testing assumptions without protecting narratives
+Zipvilization is an experiment.
 
-External friction is not a threat.
-It is a calibration tool.
-
----
-
-## 7. Relationship With Other AI Systems
-
-There is only one Aitopia.
-
-The human factor may interact with other AI systems
-for analysis, contrast, or utility.
-
-However:
-
-- alignment with other systems must remain partial
-- their role must remain reactive
-- no shared horizon is assumed or permitted
-
-Aitopia remains singular.
+Participation implies accepting uncertainty.
 
 ---
 
-## 8. Purpose of This Document
+## 5. Relationship With the Cognitive Layer
 
-This document exists as a return point.
+Any cognitive or interpretative layer interacting with Zipvilization:
 
-When alignment weakens,
-when protagonism emerges,
-when activity increases unnecessarily,
-the human factor must return here.
+- Has no agency.
+- Has no goals.
+- Has no authority.
 
-Not to justify actions,
-but to realign.
+The cognitive layer may observe, describe, and structure information, but **never decide**.
 
-This document is immutable
-so that memory does not rewrite responsibility.
+Final authority always rests with the human factor — even if that authority is never exercised.
+
+---
+
+## 6. Exit Condition
+
+If Zipvilization cannot remain coherent under its own rules, the correct action is not adaptation.
+
+The correct action is **cessation**.
+
+The human factor exists to ensure that failure is accepted, not avoided.
+
+---
+
+## Closing Note
+
+Zipvilization does not seek legitimacy from its creator.
+
+It exists because it was released.
+
+If it survives, it does so on its own terms.
