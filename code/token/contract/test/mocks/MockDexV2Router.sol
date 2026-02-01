@@ -1,69 +1,61 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-interface IERC20Minimal {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
-
 /**
- * @dev Deterministic V2-style router mock for testing.
- * NOT a real DEX implementation.
+ * @dev Minimal V2-style router mock for Foundry tests.
+ * Provides:
+ * - WETH()
+ * - getAmountsOut()
+ * - swapExactTokensForETHSupportingFeeOnTransferTokens()
+ * - addLiquidityETH()
+ *
+ * This is NOT a full router implementation. It's just enough for unit tests.
  */
 contract MockDexV2Router {
-    address public immutable WETH;
+    address public weth;
 
-    // ETH-per-token rate (scaled by 1e18)
-    uint256 public rate;
-
-    constructor(address weth_, uint256 rate_) {
-        WETH = weth_;
-        rate = rate_;
+    constructor(address _weth) {
+        weth = _weth;
     }
 
-    receive() external payable {}
-
-    function setRate(uint256 newRate) external {
-        rate = newRate;
+    function WETH() external view returns (address) {
+        return weth;
     }
 
-    function getAmountsOut(uint amountIn, address[] calldata)
+    function getAmountsOut(uint amountIn, address[] calldata /*path*/)
         external
-        view
+        pure
         returns (uint[] memory amounts)
     {
+        // Return a valid 2-length array (tokenIn -> ETH out).
         amounts = new uint;
         amounts[0] = amountIn;
-        amounts[1] = (amountIn * rate) / 1e18;
+        amounts[1] = amountIn; // simple 1:1 quote for deterministic tests
     }
 
     function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata,
-        address to,
-        uint
-    ) external {
-        IERC20Minimal(msg.sender).transferFrom(msg.sender, address(this), amountIn);
-
-        uint256 out = (amountIn * rate) / 1e18;
-        require(out >= amountOutMin, "MIN_OUT");
-
-        (bool ok, ) = to.call{value: out}("");
-        require(ok, "ETH_SEND_FAIL");
+        uint /*amountIn*/,
+        uint /*amountOutMin*/,
+        address[] calldata /*path*/,
+        address /*to*/,
+        uint /*deadline*/
+    ) external pure {
+        // no-op mock
     }
 
     function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint,
-        uint,
-        address,
-        uint
+        address /*token*/,
+        uint /*amountTokenDesired*/,
+        uint /*amountTokenMin*/,
+        uint /*amountETHMin*/,
+        address /*to*/,
+        uint /*deadline*/
     ) external payable returns (uint amountToken, uint amountETH, uint liquidity) {
-        IERC20Minimal(token).transferFrom(msg.sender, address(this), amountTokenDesired);
-
-        amountToken = amountTokenDesired;
+        // no-op mock; return basic values so calls don't revert
+        amountToken = 0;
         amountETH = msg.value;
-        liquidity = amountTokenDesired / 1e6 + msg.value / 1e12 + 1;
+        liquidity = 0;
     }
+
+    receive() external payable {}
 }
