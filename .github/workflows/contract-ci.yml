@@ -2,48 +2,33 @@ name: Contract CI (Foundry)
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
   pull_request:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
   foundry-tests:
-    name: Foundry tests
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: code/token/contract
+
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Install Foundry
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
-      # 3️⃣ Go to contract directory
-      - name: Set working directory
-        run: |
-          cd code/token/contract
-          ls -la
+      # forge now defaults to NOT committing installs; the old --no-commit flag breaks.
+      - name: Install forge-std
+        run: forge install foundry-rs/forge-std
 
-      # 4️⃣ Install dependencies (forge-std)
-      - name: Install dependencies
-        run: |
-          cd code/token/contract
-          forge install foundry-rs/forge-std
+      - name: Build
+        run: forge build
 
-      # 5️⃣ Build contracts
-      - name: Build contracts
-        run: |
-          cd code/token/contract
-          forge build
-
-      # 6️⃣ Run tests
-      - name: Run tests
-        run: |
-          cd code/token/contract
-          forge test -vv
+      - name: Test
+        run: forge test -vv
