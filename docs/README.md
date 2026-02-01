@@ -113,4 +113,79 @@ This chapter remains intentionally open.
 - One source of truth per topic  
 - Avoid duplication across blocks  
 - Blocks explain **what exists**  
-- Chapters explain **when it appears**
+- Chapters explain **when it appears**  
+
+---
+
+## ➕ Additional Context (Conceptual Extension)
+
+The structure above is intentionally minimal.
+
+Zipvilization starts from a simple but open question:
+
+> **Is it possible that a token, a contract, and a set of immutable rules
+> generate not just an economy, but the foundations of a civilization?**
+
+This documentation does not attempt to answer that question upfront.  
+It defines the conditions under which the answer could emerge.
+
+---
+
+## 🪨 Why Solum Is the Way It Is
+
+Solum is deliberately restrictive.
+
+Its taxes, limits, and mechanics are not optimizations for price or hype.
+They exist to enforce **time**, **distribution**, and **persistence**.
+
+At the contract level:
+- a holder is a holder
+- a token is a token
+- a transfer is a transfer
+
+At the Zipvilization level:
+- a holder becomes a **colono**
+- a balance becomes **territory**
+- on-chain activity becomes **history**
+
+The contract does not tell a story.  
+It protects the conditions that make a story possible.
+
+---
+
+## 🔁 About Taxes (High-Level Meaning)
+
+Taxes in Solum are not punitive mechanics.
+
+They serve three simultaneous purposes:
+
+1. **Structural stability**  
+   Preventing extractive behavior during fragile phases.
+
+2. **Colonist alignment**  
+   Rewarding long-term holders through reflection and persistence.
+
+3. **Evolution capacity**  
+   Treasury growth translates into resources for development, tooling,
+   and expansion of the Zipvilization experience.
+
+In Zipvilization terms:
+
+- Burn → scarcity and soil memory  
+- Reflection → passive participation  
+- Liquidity → world stability  
+- Treasury → **evolution**
+
+---
+
+## 🧠 Final Note
+
+Zipvilization does not deny speculation.  
+It accepts that many will arrive as investors.
+
+What it proposes is different:
+
+To translate that reality into something readable, persistent,
+and potentially meaningful over time.
+
+This documentation exists to make that translation possible.
