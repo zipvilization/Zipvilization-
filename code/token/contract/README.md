@@ -1,6 +1,6 @@
 # Solum Smart Contract
 
-This directory contains the canonical smart contract for **Solum**, the economic layer of the Semina ecosystem.
+This directory contains the canonical smart contract for **Solum**, the on-chain economic substrate used by **Zipvilization**.
 
 The contract defines all on-chain rules governing supply, transfers, limits, and taxation.  
 There are no off-chain controls, discretionary mechanisms, or post-deployment parameter changes in the current phase.
@@ -29,8 +29,8 @@ The contract does not attempt to optimize for price, volume, or market sentiment
 ### 1. Fixed Rules
 
 - All limits, taxes, and behaviors are defined at deploy time.
-- There are no hidden switches, activation phases, or emergency controls.
-- The contract behaves identically before, during, and after launch.
+- There are no hidden switches, activation phases, or discretionary overrides.
+- Once trading is enabled, the contract behavior is final.
 
 This immutability is intentional and central to system trust.
 
@@ -45,7 +45,7 @@ Transaction and wallet limits exist to:
 - Slow extraction while liquidity is fragile
 
 Limits are defensive mechanisms.  
-They do not guarantee fairness or profitability.
+They do not guarantee fairness, profitability, or protection from loss.
 
 ---
 
@@ -53,11 +53,12 @@ They do not guarantee fairness or profitability.
 
 Taxes are embedded directly into the transfer logic.
 
-They are applied symmetrically according to transaction type and serve structural purposes such as:
+They are applied according to transaction type and serve structural purposes such as:
 
 - Reinforcing liquidity
 - Enabling long-term balance mechanisms
 - Discouraging silent off-pool manipulation
+- Converting activity into system-wide effects
 
 Taxes are **rules**, not yield promises.
 
@@ -70,8 +71,9 @@ The Solum contract does not include:
 - Voting mechanisms
 - Upgrade hooks
 - Admin-driven parameter changes
+- Parameter tuning after deployment
 
-Any future evolution of the system must occur **around** the contract, not through it.
+Any evolution of Zipvilization must occur **around** the contract, not through it.
 
 ---
 
@@ -83,19 +85,20 @@ Key properties:
 
 - Solidity ^0.8.x (overflow-safe by default)
 - Explicit logic paths for all transfers
-- Designed for straightforward verification on-chain
+- No hidden execution branches
+- Deterministic behavior under inspection
 
 Auditors and reviewers should rely on:
 
 - The contract source code itself
 - Public deployment and verification tools
-- Reproducible behavior under inspection
+- Reproducible on-chain behavior
 
 ---
 
 ## Scope and Limitations
 
-This contract defines **what Solum does**, not **what Semina becomes**.
+This contract defines **what Solum does**, not **what Zipvilization becomes**.
 
 It intentionally does not address:
 
@@ -104,7 +107,7 @@ It intentionally does not address:
 - Adoption strategies
 - Narrative framing
 
-Those belong to other layers of the ecosystem.
+Those emerge from interaction, tooling, and participation beyond the contract itself.
 
 ---
 
@@ -114,4 +117,6 @@ Solum is not designed to be optimized later.
 
 It is designed to be understood now.
 
-If you are reading this, you are encouraged to inspect the code directly.
+If you are reading this, the contract already exists as a rule system.
+
+Understanding it starts with the code itself.
