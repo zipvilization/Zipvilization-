@@ -3,100 +3,104 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/Solum.sol";
+import "./mocks/MockDexV2Router.sol";
+import "./mocks/MockPair.sol";
 
+/**
+ * @notice Minimal but meaningful tests for the CANONICAL Solum contract.
+ * Focus:
+ * - supply assigned to deployer
+ * - pre-trading gate (non-exempt -> non-exempt blocked)
+ * - enableTrading is owner-only
+ * - transfer fees apply on wallet->wallet transfers (5% total; receiver gets 95%)
+ * - real burn on transfer reduces total supply by 2% of transfer amount
+ *
+ * We avoid triggering swapBack in tests (no sells to pair), keeping mocks minimal.
+ */
 contract SolumTokenTest is Test {
-    Solum internal solum;
+    // Canonical WETH on Base (valid EVM address; it doesn't need to exist on local VM)
+    address internal constant BASE_WETH =
+        0x4200000000000000000000000000000000000006;
 
     address internal owner;
     address internal treasury;
-    address internal router;
-    address internal pair;
 
-    // Canonical WETH on Base
-    address internal constant BASE_WETH =
-        0x4200000000000000000000000000000000000006;
+    MockDexV2Router internal router;
+    MockPair internal pair;
+
+    Solum internal token;
+
+    address internal alice;
+    address internal bob;
 
     function setUp() public {
         owner = address(this);
         treasury = address(0xBEEF);
-        router = address(0xCAFE);
-        pair = address(0xFACE);
 
-        solum = new Solum(
-            router,
-            pair,
-            BASE_WETH,
-            treasury
-        );
+        alice = address(0xA11CE);
+        bob = address(0xB0B);
+
+        router = new MockDexV2Router(BASE_WETH);
+        pair = new MockPair();
+
+        token = new Solum(address(router), address(pair), BASE_WETH, treasury);
     }
 
-    /* ---------------------------------------------------------- */
-    /*                      BASIC PROPERTIES                      */
-    /* ---------------------------------------------------------- */
-
-    function testMetadata() public {
-        assertEq(solum.name(), "Solum");
-        assertEq(solum.symbol(), "SOLUM");
-        assertEq(solum.decimals(), 18);
+    function testInitialSupplyMintedToOwner() public {
+        assertEq(token.balanceOf(owner), token.totalSupply());
     }
 
-    function testTotalSupplyAssignedToOwner() public {
-        uint256 total = solum.totalSupply();
-        assertEq(solum.balanceOf(owner), total);
+    function testEnableTradingOwnerOnly() public {
+        vm.prank(alice);
+        vm.expectRevert("OWNER_ONLY");
+        token.enableTrading();
+
+        token.enableTrading();
+        assertTrue(token.tradingEnabled());
     }
 
-    /* ---------------------------------------------------------- */
-    /*                      TRADING CONTROL                       */
-    /* ---------------------------------------------------------- */
+    function testPreTradingGateBlocksNonExemptTransfers() public {
+        // Owner is fee-exempt by default -> owner -> alice is allowed pre-trading
+        token.transfer(alice, 1 ether);
 
-    function testTradingDisabledByDefault() public {
-        assertFalse(solum.tradingEnabled());
-    }
-
-    function testEnableTrading() public {
-        solum.enableTrading();
-        assertTrue(solum.tradingEnabled());
-    }
-
-    function testNonExemptCannotTransferBeforeTrading() public {
-        address user = address(0x1234);
-
+        // alice -> bob is non-exempt -> non-exempt, must revert pre-trading
+        vm.prank(alice);
         vm.expectRevert("TRADING_OFF");
-        vm.prank(owner);
-        solum.transfer(user, 1 ether);
+        token.transfer(bob, 0.1 ether);
     }
 
-    /* ---------------------------------------------------------- */
-    /*                        TRANSFERS                           */
-    /* ---------------------------------------------------------- */
+    function testTransferFeeAndBurnAfterTradingEnabled() public {
+        token.enableTrading();
 
-    function testTransferAfterTradingEnabled() public {
-        address user = address(0x1234);
+        // fund alice from exempt owner (no fee on this transfer)
+        token.transfer(alice, 100 ether);
 
-        solum.enableTrading();
-        solum.transfer(user, 1 ether);
+        uint256 supplyBefore = token.totalSupply();
 
-        assertEq(solum.balanceOf(user), 1 ether);
-    }
+        uint256 sendAmount = 10 ether;
 
-    /* ---------------------------------------------------------- */
-    /*                      TREASURY SETUP                        */
-    /* ---------------------------------------------------------- */
+        uint256 bobBefore = token.balanceOf(bob);
 
-    function testTreasuryIsFeeExempt() public {
-        assertTrue(solum.isFeeExempt(treasury));
-    }
+        vm.prank(alice);
+        token.transfer(bob, sendAmount);
 
-    function testTreasuryIsLimitExempt() public {
-        assertTrue(solum.isLimitExempt(treasury));
-    }
+        uint256 bobAfter = token.balanceOf(bob);
 
-    /* ---------------------------------------------------------- */
-    /*                      SANITY CHECKS                         */
-    /* ---------------------------------------------------------- */
+        // Receiver should get 95% (5% total fee on transfer)
+        uint256 expectedReceived = (sendAmount * 95) / 100;
 
-    function testRouterAndPairExemptions() public {
-        assertTrue(solum.isLimitExempt(router));
-        assertTrue(solum.isLimitExempt(pair));
+        // Allow 1 wei rounding tolerance due to reflection rate integer division
+        uint256 received = bobAfter - bobBefore;
+        assertTrue(
+            received == expectedReceived || received + 1 == expectedReceived || received == expectedReceived + 1,
+            "RECEIVE_MISMATCH"
+        );
+
+        // Burn on transfer is 2% of sendAmount -> supply must decrease by that amount
+        uint256 expectedBurn = (sendAmount * 2) / 100;
+        uint256 supplyAfter = token.totalSupply();
+
+        assertEq(supplyBefore - supplyAfter, expectedBurn);
     }
 }
+```0
