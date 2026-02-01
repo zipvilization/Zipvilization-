@@ -45,4 +45,3 @@ jobs:
       - name: Run tests
         working-directory: code/token/contract
         run: forge test -vvv
-```0
