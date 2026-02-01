@@ -12,7 +12,8 @@ pragma solidity ^0.8.20;
  * - Immutable buy/sell/transfer fee rules (constants)
  * - Anti-whale protections (maxTx + dynamic maxWallet)
  * - Treasury timelock (propose/confirm)
- * - SwapBack controls (pause + cooldown + cap + slippage guard when possible)
+ * - SwapBack controls (pause + cooldown + cap + best-effort slippage guard)
+ * - Post-launch config freeze (Option A)
  *
  * IMPORTANT:
  * - This contract expects a V2-style router interface for swap/addLiquidity.
@@ -121,7 +122,7 @@ contract Solum is IERC20, Ownable {
 
     uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals; // 30B
     uint256 public constant MAX_WALLET_GROWTH_DELAY = 180 days;
-    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000; // +10% weekly in ppm (1,000,000 = 100%)
+    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000; // +10% weekly (1.10x)
 
     /* ---------- TREASURY TIMELOCK ---------- */
     address public treasury;
@@ -134,14 +135,30 @@ contract Solum is IERC20, Ownable {
     address public immutable pair;
     address public immutable weth;
 
+    /* ---------- CONFIG FREEZE (OPTION A) ---------- */
+    bool public configFrozen = false;
+    event ConfigFrozen(uint256 timestamp);
+
+    modifier whenConfigNotFrozen() {
+        require(!configFrozen, "CONFIG_FROZEN");
+        _;
+    }
+
+    function freezeConfig() external onlyOwner whenConfigNotFrozen {
+        // You may choose to require(tradingEnabled) to avoid freezing too early.
+        // require(tradingEnabled, "TRADING_OFF");
+        configFrozen = true;
+        emit ConfigFrozen(block.timestamp);
+    }
+
     /* ---------- SWAPBACK CONTROLS ---------- */
     bool public swapBackEnabled = true;
     bool public tradingEnabled = false;
 
-    uint256 public swapThreshold = 200_000_000 * 10**decimals;  // 200M tokens (tune)
-    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B tokens max per swap (tune)
-    uint256 public swapBackCooldown = 60; // seconds (tune)
-    uint256 public slippageBps = 300; // 3% (tune 50..800 typical)
+    uint256 public swapThreshold = 200_000_000 * 10**decimals;       // 200M tokens (tune pre-freeze)
+    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B tokens max per swap (tune pre-freeze)
+    uint256 public swapBackCooldown = 60;                            // seconds (tune pre-freeze)
+    uint256 public slippageBps = 300;                                // 3% (tune pre-freeze; 50..800)
 
     uint256 public lastSwapBackTime;
     bool private _inSwapBack;
@@ -187,7 +204,7 @@ contract Solum is IERC20, Ownable {
         _rOwned[msg.sender] = _rTotal;
         emit Transfer(address(0), msg.sender, _tTotal);
 
-        // exemptions
+        // exemptions (can be frozen later)
         isFeeExempt[msg.sender] = true;
         isFeeExempt[address(this)] = true;
         isFeeExempt[_treasury] = true;
@@ -245,6 +262,7 @@ contract Solum is IERC20, Ownable {
     }
 
     function setSwapBackPaused(bool paused) external onlyOwner {
+        // Operational safety switch is allowed even after freeze.
         swapBackEnabled = !paused;
         emit SwapBackPaused(paused);
     }
@@ -254,7 +272,7 @@ contract Solum is IERC20, Ownable {
         uint256 maxAmount,
         uint256 cooldownSeconds,
         uint256 newSlippageBps
-    ) external onlyOwner {
+    ) external onlyOwner whenConfigNotFrozen {
         // guardrails (avoid accidental DoS / extremes)
         require(newSlippageBps >= 50 && newSlippageBps <= 800, "SLIPPAGE_RANGE");
         require(maxAmount >= threshold, "MAX_LT_THRESHOLD");
@@ -268,11 +286,11 @@ contract Solum is IERC20, Ownable {
         emit SwapBackConfigUpdated(threshold, maxAmount, cooldownSeconds, newSlippageBps);
     }
 
-    function setFeeExempt(address account, bool exempt) external onlyOwner {
+    function setFeeExempt(address account, bool exempt) external onlyOwner whenConfigNotFrozen {
         isFeeExempt[account] = exempt;
     }
 
-    function setLimitExempt(address account, bool exempt) external onlyOwner {
+    function setLimitExempt(address account, bool exempt) external onlyOwner whenConfigNotFrozen {
         isLimitExempt[account] = exempt;
     }
 
@@ -292,7 +310,7 @@ contract Solum is IERC20, Ownable {
         pendingTreasury = address(0);
         treasuryChangeTime = 0;
 
-        // keep exemptions aligned
+        // keep exemptions aligned (may be frozen already; but treasury change is protected by timelock)
         isFeeExempt[treasury] = true;
         isLimitExempt[treasury] = true;
 
@@ -316,12 +334,10 @@ contract Solum is IERC20, Ownable {
     }
 
     function _getRate() internal view returns (uint256) {
-        // rTotal and tTotal always decrease together for real burn
         return _rTotal / _tTotal;
     }
 
     function _maxWalletNow() internal view returns (uint256) {
-        // Dynamic growth starts after delay, increases weekly by +10% (ppm) compounding.
         if (block.timestamp < deploymentTime + MAX_WALLET_GROWTH_DELAY) {
             return MAX_WALLET_INITIAL;
         }
@@ -329,33 +345,31 @@ contract Solum is IERC20, Ownable {
         uint256 weeksElapsed = (block.timestamp - (deploymentTime + MAX_WALLET_GROWTH_DELAY)) / 1 weeks;
         uint256 limit = MAX_WALLET_INITIAL;
 
-        // cap loop cost: if someone calls years later, the loop could be large.
-        // We cap to 520 weeks (~10 years) to avoid pathological gas. After that, treat as "effectively uncapped".
+        // cap loop cost (~10 years). After that treat as effectively uncapped.
         if (weeksElapsed > 520) {
             return type(uint256).max;
         }
 
-        // compounding: limit *= 1.10 weekly (ppm +10%)
         for (uint256 i = 0; i < weeksElapsed; i++) {
-            // limit = limit * 1.10
+            // +10% weekly: limit *= 1.10
             limit = (limit * MAX_WALLET_WEEKLY_GROWTH) / 100_000;
         }
 
         return limit;
     }
 
-    function _shouldSwapBack(address from, address to) internal view returns (bool) {
+    function _shouldSwapBack(address /*from*/, address to) internal view returns (bool) {
         if (!swapBackEnabled) return false;
         if (_inSwapBack) return false;
         if (!tradingEnabled) return false;
 
-        // trigger primarily on sells to reduce random timing
+        // Trigger primarily on sells to reduce random timing.
         bool isSell = (to == pair);
         if (!isSell) return false;
 
         if (block.timestamp < lastSwapBackTime + swapBackCooldown) return false;
 
-        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
+        uint256 contractTokenBalance = balanceOf(address(this));
         return contractTokenBalance >= swapThreshold;
     }
 
@@ -434,20 +448,19 @@ contract Solum is IERC20, Ownable {
 
         emit Transfer(from, to, tTransferAmount);
 
-        // Handle LP + Treasury fee: collected to contract (later swapBack)
+        // LP + Treasury fee: collected to contract (later swapBack)
         uint256 rToContract = rLP + rTreasury;
         if (rToContract > 0) {
             _rOwned[address(this)] += rToContract;
             emit Transfer(from, address(this), tLP + tTreasury);
         }
 
-        // Handle reflection: reduce rTotal (standard reflect mechanic)
+        // Reflection: reduce rTotal (standard reflect mechanic)
         if (rReflection > 0) {
             _rTotal -= rReflection;
-            // no Transfer event for reflection, by design
         }
 
-        // Handle real burn: reduce both tTotal and rTotal to keep rate consistent
+        // Real burn: reduce both totals to keep rate consistent
         if (tBurn > 0) {
             _tTotal -= tBurn;
             _rTotal -= rBurn;
@@ -462,59 +475,36 @@ contract Solum is IERC20, Ownable {
     function _swapBack() internal lockTheSwap {
         lastSwapBackTime = block.timestamp;
 
-        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
+        uint256 contractTokenBalance = balanceOf(address(this));
         if (contractTokenBalance < swapThreshold) return;
 
         uint256 amountToProcess = contractTokenBalance;
         if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
 
-        // In this design, LP fee + treasury fee tokens are both held by contract.
-        // We split half of the LP portion for liquidity, swap the rest for ETH,
-        // then add liquidity and send treasury ETH.
+        // Conservative split:
+        // - 25% of processed tokens paired with ETH for liquidity
+        // - 75% swapped for ETH, then ETH split 50/50 (liquidity/treasury)
+        uint256 tokensForLiquidity = amountToProcess / 4;
+        uint256 tokensToSwapForETH = amountToProcess - tokensForLiquidity;
 
-        // We do not track exact LP-vs-treasury token buckets on-chain here;
-        // instead we approximate by using the SELL_LP_FEE + BUY_LP_FEE share against total collected.
-        // For precise accounting, you can maintain separate counters during fee collection.
-
-        // Conservative approach: send 50% of processed tokens to liquidity half, rest swapped to ETH.
-        uint256 tokensForLiquidityHalf = amountToProcess / 4; // 25% of processed tokens
-        uint256 tokensToSwapForETH = amountToProcess - tokensForLiquidityHalf;
-
-        // Move tokensToSwapForETH into reflected terms
-        uint256 rRate = _getRate();
-        uint256 rTokensToSwap = tokensToSwapForETH * rRate;
-        uint256 rTokensForLiq = tokensForLiquidityHalf * rRate;
-
-        // Deduct from contract reflected balance for swap and liquidity operations
-        require(_rOwned[address(this)] >= (rTokensToSwap + rTokensForLiq), "CONTRACT_BAL");
-        _rOwned[address(this)] -= (rTokensToSwap + rTokensForLiq);
-
-        // Approve router
-        _approveInternal(address(this), router, tokensToSwapForETH + tokensForLiquidityHalf);
+        // Approve router for the exact amount used.
+        _approveInternal(address(this), router, amountToProcess);
 
         uint256 ethBefore = address(this).balance;
 
-        // Swap tokensToSwapForETH for ETH, best-effort minOut
+        // Swap tokensToSwapForETH for ETH, best-effort minOut.
         uint256 minOut = _computeMinOut(tokensToSwapForETH);
         _swapTokensForETH(tokensToSwapForETH, minOut);
 
         uint256 ethGained = address(this).balance - ethBefore;
-        if (ethGained == 0) {
-            // refund tokens to contract balance if swap failed? cannot detect without try/catch around swap
-            // In practice, a revert would undo state. If router succeeds but returns 0, we proceed safely.
-        }
+        if (ethGained == 0) return;
 
-        // Use part of ETH for liquidity. Conservative split: 50% to liquidity, 50% to treasury.
         uint256 ethForLiquidity = ethGained / 2;
         uint256 ethForTreasury = ethGained - ethForLiquidity;
 
-        // Add liquidity with tokensForLiquidityHalf + ethForLiquidity (best-effort mins are 0 to avoid DoS)
-        if (tokensForLiquidityHalf > 0 && ethForLiquidity > 0) {
-            _addLiquidity(tokensForLiquidityHalf, ethForLiquidity);
-        } else {
-            // if no liquidity added, return tokensForLiquidityHalf to contract reflected balance
-            _rOwned[address(this)] += rTokensForLiq;
-            emit Transfer(address(this), address(this), 0);
+        // Add liquidity (mins set to 0 to avoid revert/DoS; protected by cap+cooldown+minOut on swap)
+        if (tokensForLiquidity > 0 && ethForLiquidity > 0) {
+            _addLiquidity(tokensForLiquidity, ethForLiquidity);
         }
 
         // Treasury payout
@@ -534,8 +524,8 @@ contract Solum is IERC20, Ownable {
             if (amounts.length < 2) return 0;
             uint256 expectedOut = amounts[amounts.length - 1];
             if (expectedOut == 0) return 0;
+
             uint256 bps = slippageBps;
-            // minOut = expectedOut * (10000 - bps) / 10000
             return (expectedOut * (10_000 - bps)) / 10_000;
         } catch {
             return 0;
@@ -572,10 +562,5 @@ contract Solum is IERC20, Ownable {
         emit Approval(owner_, spender, amount);
     }
 
-    /* ============================== */
-    /* ========= RECEIVE ETH ======== */
-    /* ============================== */
-
     receive() external payable {}
 }
-```2
