@@ -10,30 +10,40 @@ on:
 
 jobs:
   foundry-tests:
+    name: Foundry tests
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: code/token/contract
-
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Install Foundry
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: nightly
 
-      - name: Install dependencies (forge-std)
+      # 3️⃣ Go to contract directory
+      - name: Set working directory
         run: |
-          # Required by tests: import "forge-std/Test.sol";
-          if [ ! -d "lib/forge-std" ]; then
-            forge install foundry-rs/forge-std --no-commit
-          fi
+          cd code/token/contract
+          ls -la
 
+      # 4️⃣ Install dependencies (forge-std)
+      - name: Install dependencies
+        run: |
+          cd code/token/contract
+          forge install foundry-rs/forge-std
+
+      # 5️⃣ Build contracts
       - name: Build contracts
-        run: forge build
+        run: |
+          cd code/token/contract
+          forge build
 
+      # 6️⃣ Run tests
       - name: Run tests
-        run: forge test -vv
+        run: |
+          cd code/token/contract
+          forge test -vv
