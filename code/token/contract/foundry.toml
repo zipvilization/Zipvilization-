@@ -1,18 +1,40 @@
 [profile.default]
-# Run forge from this folder:
-#   cd code/token/contract
-#   forge test -vv
-#
-# This config treats this folder as the Foundry project root.
-
-src = "."
+# Core paths
+src = "src"
 test = "test"
 out = "out"
 libs = ["lib"]
 
+# Solidity / EVM
 solc_version = "0.8.20"
+evm_version = "paris"
 optimizer = true
 optimizer_runs = 200
 
-# Optional: faster test runs
-fuzz_runs = 2048
+# Testing
+verbosity = 2
+ffi = false
+
+# Fuzzing (clean, no warnings)
+[fuzz]
+runs = 256
+
+# RPCs (optional, safe defaults)
+[rpc_endpoints]
+base = "https://mainnet.base.org"
+
+# Formatter
+[fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = true
+
+# Profiles for CI (explicit but minimal)
+[profile.ci]
+src = "src"
+test = "test"
+out = "out"
+libs = ["lib"]
+verbosity = 3
+optimizer = true
+optimizer_runs = 200
