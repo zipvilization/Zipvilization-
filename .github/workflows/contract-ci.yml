@@ -2,17 +2,17 @@ name: Contract CI (Foundry)
 
 on:
   push:
-    branches: ["main"]
+    paths:
+      - "code/token/contract/**"
+      - ".github/workflows/contract-ci.yml"
   pull_request:
-    branches: ["main"]
+    paths:
+      - "code/token/contract/**"
+      - ".github/workflows/contract-ci.yml"
 
 jobs:
   foundry-tests:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: code/token/contract
 
     steps:
       - name: Checkout
@@ -23,12 +23,25 @@ jobs:
         with:
           version: stable
 
-      # forge now defaults to NOT committing installs; the old --no-commit flag breaks.
-      - name: Install forge-std
-        run: forge install foundry-rs/forge-std
+      - name: Configure git identity (needed by forge install)
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-      - name: Build
-        run: forge build
+      - name: Install dependencies (forge-std)
+        working-directory: code/token/contract
+        run: |
+          # If dependency folder exists, skip install
+          if [ -d "lib/forge-std" ]; then
+            echo "forge-std already present"
+          else
+            forge install foundry-rs/forge-std
+          fi
 
-      - name: Test
-        run: forge test -vv
+      - name: Build contracts
+        working-directory: code/token/contract
+        run: forge build -vvv
+
+      - name: Run tests
+        working-directory: code/token/contract
+        run: forge test -vvv
