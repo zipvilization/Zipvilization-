@@ -16,4 +16,3 @@ optimizer_runs = 200
 
 # Optional: faster test runs
 fuzz_runs = 2048
-```0
