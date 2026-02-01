@@ -89,25 +89,25 @@ contract Solum is IERC20, Ownable {
     uint256 private constant FEE_DENOM = 1_000_000;
 
     /* ---------- TAX CONFIG ---------- */
-    uint256 public constant BUY_LP_FEE = 5_000;
-    uint256 public constant BUY_TREASURY_FEE = 5_000;
+    uint256 public constant BUY_LP_FEE = 5_000;        // 0.5%
+    uint256 public constant BUY_TREASURY_FEE = 5_000;  // 0.5%
 
-    uint256 public constant SELL_BURN_FEE = 40_000;
-    uint256 public constant SELL_REFLECTION_FEE = 30_000;
-    uint256 public constant SELL_LP_FEE = 20_000;
-    uint256 public constant SELL_TREASURY_FEE = 10_000;
+    uint256 public constant SELL_BURN_FEE = 40_000;       // 4%
+    uint256 public constant SELL_REFLECTION_FEE = 30_000; // 3%
+    uint256 public constant SELL_LP_FEE = 20_000;         // 2%
+    uint256 public constant SELL_TREASURY_FEE = 10_000;   // 1%
 
-    uint256 public constant TRANSFER_BURN_FEE = 20_000;
-    uint256 public constant TRANSFER_REFLECTION_FEE = 30_000;
+    uint256 public constant TRANSFER_BURN_FEE = 20_000;       // 2%
+    uint256 public constant TRANSFER_REFLECTION_FEE = 30_000; // 3%
 
     bool public feesLocked = true;
 
     /* ---------- LIMITS ---------- */
-    uint256 public constant MAX_TX_AMOUNT = 10_000_000_000 * 10**decimals;
+    uint256 public constant MAX_TX_AMOUNT = 10_000_000_000 * 10**decimals; // 10B
 
-    uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals;
+    uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals; // 30B
     uint256 public constant MAX_WALLET_GROWTH_DELAY = 180 days;
-    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000;
+    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000; // +10% weekly (ppm base 100,000)
 
     /* ---------- TREASURY ---------- */
     address public treasury;
@@ -138,10 +138,10 @@ contract Solum is IERC20, Ownable {
     bool public tradingEnabled = false;
     bool public swapBackEnabled = true;
 
-    uint256 public swapThreshold = 200_000_000 * 10**decimals;
-    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals;
-    uint256 public swapBackCooldown = 60;
-    uint256 public slippageBps = 300;
+    uint256 public swapThreshold = 200_000_000 * 10**decimals;       // 200M
+    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B
+    uint256 public swapBackCooldown = 60;                            // seconds
+    uint256 public slippageBps = 300;                                // 3%
 
     uint256 public lastSwapBackTime;
     bool private _inSwapBack;
@@ -173,23 +173,19 @@ contract Solum is IERC20, Ownable {
         address _weth,
         address _treasury
     ) {
-        require(
-            _router != address(0) &&
-            _pair != address(0) &&
-            _weth != address(0) &&
-            _treasury != address(0),
-            "ZERO_ADDR"
-        );
+        require(_router != address(0) && _pair != address(0) && _weth != address(0) && _treasury != address(0), "ZERO_ADDR");
 
         router = _router;
         pair = _pair;
         weth = _weth;
         treasury = _treasury;
+
         deploymentTime = block.timestamp;
 
         _rOwned[msg.sender] = _rTotal;
         emit Transfer(address(0), msg.sender, _tTotal);
 
+        // exemptions
         isFeeExempt[msg.sender] = true;
         isFeeExempt[address(this)] = true;
         isFeeExempt[_treasury] = true;
@@ -284,12 +280,14 @@ contract Solum is IERC20, Ownable {
         treasury = pendingTreasury;
         pendingTreasury = address(0);
         treasuryChangeTime = 0;
+
         isFeeExempt[treasury] = true;
         isLimitExempt[treasury] = true;
+
         emit TreasuryConfirmed(treasury);
     }
 
-    /* ---------- INTERNAL ---------- */
+    /* ---------- INTERNALS ---------- */
 
     function tokenFromReflection(uint256 rAmount) public view returns (uint256) {
         uint256 rate = _rTotal / _tTotal;
@@ -301,9 +299,9 @@ contract Solum is IERC20, Ownable {
             return MAX_WALLET_INITIAL;
         }
 
-        uint256 weeksElapsed =
-            (block.timestamp - (deploymentTime + MAX_WALLET_GROWTH_DELAY)) / 1 weeks;
+        uint256 weeksElapsed = (block.timestamp - (deploymentTime + MAX_WALLET_GROWTH_DELAY)) / 1 weeks;
 
+        // cap for gas safety (~10 years). After that: effectively uncapped.
         if (weeksElapsed > 520) return type(uint256).max;
 
         uint256 limit = MAX_WALLET_INITIAL;
@@ -314,9 +312,15 @@ contract Solum is IERC20, Ownable {
     }
 
     function _shouldSwapBack(address to) internal view returns (bool) {
-        if (!swapBackEnabled || _inSwapBack || !tradingEnabled) return false;
+        if (!swapBackEnabled) return false;
+        if (_inSwapBack) return false;
+        if (!tradingEnabled) return false;
+
+        // trigger only on sells
         if (to != pair) return false;
+
         if (block.timestamp < lastSwapBackTime + swapBackCooldown) return false;
+
         return balanceOf(address(this)) >= swapThreshold;
     }
 
@@ -324,18 +328,22 @@ contract Solum is IERC20, Ownable {
         require(from != address(0) && to != address(0), "ZERO_ADDR");
         require(tAmount > 0, "ZERO_AMOUNT");
 
+        // Pre-trading: only exempt addresses can move
         if (!tradingEnabled) {
             require(isFeeExempt[from] || isFeeExempt[to], "TRADING_OFF");
         }
 
+        // maxTx
         if (!isLimitExempt[from] && !isLimitExempt[to]) {
             require(tAmount <= MAX_TX_AMOUNT, "MAX_TX");
         }
 
+        // swapBack (best-effort) before fee application on this sell
         if (_shouldSwapBack(to)) {
             _swapBack();
         }
 
+        // maxWallet (on receive only)
         if (!isLimitExempt[to] && to != pair && to != router) {
             require(balanceOf(to) + tAmount <= _maxWalletNow(), "MAX_WALLET");
         }
@@ -367,22 +375,29 @@ contract Solum is IERC20, Ownable {
             }
         }
 
-        uint256 tFee = tBurn + tReflection + tLP + tTreasury;
-        uint256 tTransfer = tAmount - tFee;
+        uint256 tFeeTotal = tBurn + tReflection + tLP + tTreasury;
+        uint256 tTransferAmount = tAmount - tFeeTotal;
 
+        // sender
+        require(_rOwned[from] >= rAmount, "BALANCE");
         _rOwned[from] -= rAmount;
-        _rOwned[to] += tTransfer * rate;
-        emit Transfer(from, to, tTransfer);
 
+        // recipient
+        _rOwned[to] += tTransferAmount * rate;
+        emit Transfer(from, to, tTransferAmount);
+
+        // contract collects LP + treasury tokens
         if (tLP + tTreasury > 0) {
             _rOwned[address(this)] += (tLP + tTreasury) * rate;
             emit Transfer(from, address(this), tLP + tTreasury);
         }
 
+        // reflection reduces rTotal
         if (tReflection > 0) {
             _rTotal -= tReflection * rate;
         }
 
+        // real burn reduces both tTotal and rTotal
         if (tBurn > 0) {
             _tTotal -= tBurn;
             _rTotal -= tBurn * rate;
@@ -390,18 +405,22 @@ contract Solum is IERC20, Ownable {
         }
     }
 
+    /* ---------- SWAPBACK ---------- */
+
     function _swapBack() internal lockTheSwap {
         lastSwapBackTime = block.timestamp;
 
         uint256 contractTokens = balanceOf(address(this));
-        uint256 amount = contractTokens > swapBackMaxAmount
-            ? swapBackMaxAmount
-            : contractTokens;
+        if (contractTokens < swapThreshold) return;
 
-        uint256 tokensForLiquidity = amount / 4;
-        uint256 tokensToSwap = amount - tokensForLiquidity;
+        uint256 amountToProcess = contractTokens;
+        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
 
-        _approveInternal(address(this), router, amount);
+        // conservative split: 25% tokens for liquidity, 75% swapped for ETH
+        uint256 tokensForLiquidity = amountToProcess / 4;
+        uint256 tokensToSwap = amountToProcess - tokensForLiquidity;
+
+        _approveInternal(address(this), router, amountToProcess);
 
         uint256 ethBefore = address(this).balance;
 
@@ -425,27 +444,30 @@ contract Solum is IERC20, Ownable {
     }
 
     function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
+        // best-effort quote; if router does not support it, return 0
         address;
         path[0] = address(this);
         path[1] = weth;
 
         try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
             if (amounts.length < 2) return 0;
-            uint256 expected = amounts[1];
-            return (expected * (10_000 - slippageBps)) / 10_000;
+            uint256 expectedOut = amounts[amounts.length - 1];
+            if (expectedOut == 0) return 0;
+
+            return (expectedOut * (10_000 - slippageBps)) / 10_000;
         } catch {
             return 0;
         }
     }
 
-    function _swapTokensForETH(uint256 amount, uint256 minOut) internal {
+    function _swapTokensForETH(uint256 tokenAmount, uint256 amountOutMin) internal {
         address;
         path[0] = address(this);
         path[1] = weth;
 
         IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
-            amount,
-            minOut,
+            tokenAmount,
+            amountOutMin,
             path,
             address(this),
             block.timestamp
