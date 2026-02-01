@@ -1,151 +1,104 @@
-# Colonist Status & Early Access  
-**Concept Draft — Not Active**
+# Early Access (Phase 0)
+
+Early access in Zipvilization exists for one reason only:
+
+**to protect the initial phase of the system from distortion.**
+
+This document defines how and why early access is granted, and what it does — and does not — imply.
 
 ---
 
-## Status
+## 1. Purpose of Early Access
 
-This document describes a **concept under consideration**.
+Phase 0 of Zipvilization is structurally fragile.
 
-It is:
-- Not active
-- Not implemented
-- Not guaranteed
-- Not a promise
-- Not a launch announcement
-- Not a whitelist
+Low participation, low activity, and incomplete tooling create conditions where:
+- A small number of actors can dominate the system
+- Rules cannot express their intended behavior
+- The experiment becomes invalid before it begins
 
-This concept may evolve, change, or never be implemented.
+Early access exists to **ensure sufficient, distributed participation at launch**.
 
-If it is ever implemented, this document will be updated first.
+It is a defensive mechanism, not a reward.
 
 ---
 
-## Context
+## 2. Whitelist as a Structural Tool
 
-Semina is not designed around urgency, competition, or advantage.
-It is designed around **alignment**, **understanding**, and **long-term participation**.
+Early access is implemented through a **whitelist**.
 
-In that context, the idea of “early access” must be handled with extreme care.
-Most token launches treat early access as:
-- A privilege
-- A financial advantage
-- A reward for speed, capital, or automation
+The whitelist does not represent trust, belief, or endorsement.
+It represents **prior coordination**.
 
-Semina explicitly rejects that framing.
-
----
-
-## Colonist as a Concept
-
-In Semina, a **Colonist** is not defined by ownership.
-A Colonist is defined by **intent**.
-
-A person becomes a Colonist at the moment they consciously choose
-to observe, understand, and align with the system —
-even before interacting with any on-chain asset.
-
-Colonist status is therefore:
-- Conceptual, not financial
-- Temporal, not hierarchical
-- Open, not exclusive
+Its sole purpose is to:
+- Guarantee access to Phase 0
+- Prevent exclusion by opportunistic behavior
+- Ensure a minimum number of active colonists at launch
 
 ---
 
-## Moral Alignment vs. Advantage
+## 3. Who Can Be Whitelisted
 
-If someone discovers Semina early, studies it,
-and wishes to participate when participation becomes possible,
-Semina has a **moral obligation** not to exclude them arbitrarily.
+Early access may be granted to participants who:
 
-This is not a privilege.
-It is not an advantage.
-It is not a promise of outcome.
+- Help communicate the existence of Zipvilization
+- Contribute feedback during Phase 0
+- Assist in testing visibility, tooling, or interpretation layers
+- Participate constructively in early observation
 
-It is alignment.
+No technical contribution is required.
+No capital commitment is required.
 
-Semina does not reward speed.
-It does not reward optimization.
-It does not reward capital.
-
-It respects **intentional early presence**.
+Participation is social and structural, not financial.
 
 ---
 
-## Why This Is Difficult
+## 4. What Early Access Does NOT Grant
 
-Fair launches often fail in practice because:
-- Automation outpaces humans
-- Access becomes a profession
-- Real participants are displaced by infrastructure
+Being whitelisted does not grant:
 
-Semina does not aim to “fix” this perfectly.
-It aims to **not pretend it doesn’t exist**.
+- Preferential economic treatment
+- Permanent advantages
+- Governance rights
+- Influence over rules
+- Protection from loss
 
-Any mechanism that enables early participation
-must not introduce:
-- Guaranteed upside
-- Preferential pricing
-- Asymmetric information
-- Competitive urgency
+Once Phase 0 ends, the whitelist **loses relevance**.
+
+Rules apply equally to all participants.
 
 ---
 
-## One Possible Direction (Non-Binding)
+## 5. Temporary and Revocable
 
-One possible (non-binding) approach under consideration is:
+Early access is:
 
-- A simple, voluntary declaration of interest
-- No payment
-- No ranking
-- No selection
-- No guarantees
+- Temporary
+- Limited to Phase 0
+- Revocable if abused
 
-Example:
-A public form where an individual may declare:
-- Intent to participate
-- Optional wallet address
-- Understanding that nothing is promised
-
-If a launch ever occurs,
-this could be used only to **prevent exclusion** —
-not to create advantage.
-
-This is not finalized.
-It may never happen.
+The whitelist is not a membership list.
+It is a launch instrument.
 
 ---
 
-## Transparency as a Constraint
+## 6. Transition Out of Early Access
 
-This document exists publicly for one reason:
-**to be criticized**.
+When Zipvilization reaches sufficient participation density:
 
-If this concept introduces:
-- Hidden privilege
-- Structural unfairness
-- Narrative drift
-- Implicit promises
+- Early access is removed
+- Access becomes open
+- The system operates without coordination layers
 
-then it should be rejected.
-
-Semina prefers visible uncertainty
-over invisible manipulation.
+The goal of early access is its own disappearance.
 
 ---
 
-## Final Note
+## Closing Note
 
-Semina does not ask for belief.
-It does not ask for trust.
-It does not ask for participation.
+Early access is not about being early.
 
-It only asks that, if participation happens,
-it happens **coherently**.
+It is about being **present when presence matters**.
 
-Colonist status is not about access to a token.
-It is about acknowledging alignment
-before value, before price, before outcome.
-
-Whether this concept lives or dies
-will be decided openly.
+Zipvilization does not reward belief or speculation.
+It requires participation to exist at all.
