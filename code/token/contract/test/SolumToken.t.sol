@@ -2,53 +2,101 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../SolumToken.sol";
+import "../src/Solum.sol";
 
 contract SolumTokenTest is Test {
-    Solum solum;
+    Solum internal solum;
 
-    // Base canonical WETH (Base mainnet & Base Sepolia)
-    address internal constant WETH =
+    address internal owner;
+    address internal treasury;
+    address internal router;
+    address internal pair;
+
+    // Canonical WETH on Base
+    address internal constant BASE_WETH =
         0x4200000000000000000000000000000000000006;
 
-    address internal constant ROUTER =
-        address(0x1111111111111111111111111111111111111111);
-
-    address internal constant PAIR =
-        address(0x2222222222222222222222222222222222222222);
-
-    address internal constant TREASURY =
-        address(0x3333333333333333333333333333333333333333);
-
     function setUp() public {
+        owner = address(this);
+        treasury = address(0xBEEF);
+        router = address(0xCAFE);
+        pair = address(0xFACE);
+
         solum = new Solum(
-            ROUTER,
-            PAIR,
-            WETH,
-            TREASURY
+            router,
+            pair,
+            BASE_WETH,
+            treasury
         );
     }
 
-    function testInitialSupplyAssignedToDeployer() public {
-        uint256 totalSupply = solum.totalSupply();
-        uint256 deployerBalance = solum.balanceOf(address(this));
+    /* ---------------------------------------------------------- */
+    /*                      BASIC PROPERTIES                      */
+    /* ---------------------------------------------------------- */
 
-        assertEq(deployerBalance, totalSupply, "Supply not assigned to deployer");
+    function testMetadata() public {
+        assertEq(solum.name(), "Solum");
+        assertEq(solum.symbol(), "SOLUM");
+        assertEq(solum.decimals(), 18);
     }
 
+    function testTotalSupplyAssignedToOwner() public {
+        uint256 total = solum.totalSupply();
+        assertEq(solum.balanceOf(owner), total);
+    }
+
+    /* ---------------------------------------------------------- */
+    /*                      TRADING CONTROL                       */
+    /* ---------------------------------------------------------- */
+
     function testTradingDisabledByDefault() public {
-        vm.expectRevert("TRADING_OFF");
-        solum.transfer(address(0xdead), 1 ether);
+        assertFalse(solum.tradingEnabled());
     }
 
     function testEnableTrading() public {
         solum.enableTrading();
-        solum.transfer(address(0xdead), 1 ether);
+        assertTrue(solum.tradingEnabled());
+    }
 
-        assertEq(
-            solum.balanceOf(address(0xdead)),
-            1 ether,
-            "Transfer failed after trading enabled"
-        );
+    function testNonExemptCannotTransferBeforeTrading() public {
+        address user = address(0x1234);
+
+        vm.expectRevert("TRADING_OFF");
+        vm.prank(owner);
+        solum.transfer(user, 1 ether);
+    }
+
+    /* ---------------------------------------------------------- */
+    /*                        TRANSFERS                           */
+    /* ---------------------------------------------------------- */
+
+    function testTransferAfterTradingEnabled() public {
+        address user = address(0x1234);
+
+        solum.enableTrading();
+        solum.transfer(user, 1 ether);
+
+        assertEq(solum.balanceOf(user), 1 ether);
+    }
+
+    /* ---------------------------------------------------------- */
+    /*                      TREASURY SETUP                        */
+    /* ---------------------------------------------------------- */
+
+    function testTreasuryIsFeeExempt() public {
+        assertTrue(solum.isFeeExempt(treasury));
+    }
+
+    function testTreasuryIsLimitExempt() public {
+        assertTrue(solum.isLimitExempt(treasury));
+    }
+
+    /* ---------------------------------------------------------- */
+    /*                      SANITY CHECKS                         */
+    /* ---------------------------------------------------------- */
+
+    function testRouterAndPairExemptions() public {
+        assertTrue(solum.isLimitExempt(router));
+        assertTrue(solum.isLimitExempt(pair));
     }
 }
