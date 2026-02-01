@@ -7,13 +7,12 @@ pragma solidity ^0.8.20;
  * @dev Base network. DEX integration is router/pair injected at deploy (V2-style router).
  *
  * CORE PRINCIPLES:
- * - Fixed supply (no mint, no inflation)
+ * - Fixed supply (no mint)
  * - Reflection (dual-supply) + real burn
- * - Immutable fee rules (constants)
+ * - Immutable fee rules
  * - Anti-whale protections
  * - Treasury timelock
  * - SwapBack with caps + cooldown
- * - Post-launch config freeze (Option A)
  */
 
 interface IERC20 {
@@ -76,77 +75,94 @@ abstract contract Ownable {
 }
 
 contract Solum is IERC20, Ownable {
-    /* ---------- METADATA ---------- */
+
+    /* ---------------------------------------------------------- */
+    /*                         CONSTANTS                          */
+    /* ---------------------------------------------------------- */
+
     string public constant name = "Solum";
     string public constant symbol = "SOLUM";
     uint8 public constant decimals = 18;
 
-    /* ---------- SUPPLY (DUAL) ---------- */
+    uint256 private constant FEE_DENOM = 1_000_000;
+
+    // ✅ Canonical Base WETH (fallback if _weth == address(0))
+    address public constant BASE_WETH =
+        0x4200000000000000000000000000000000000006;
+
+    /* ---------------------------------------------------------- */
+    /*                         SUPPLY                             */
+    /* ---------------------------------------------------------- */
+
     uint256 private _tTotal = 100_000_000_000_000 * 10**decimals; // 100T
     uint256 private _rTotal = type(uint256).max - (type(uint256).max % _tTotal);
 
-    /* ---------- FEE DENOM ---------- */
-    uint256 private constant FEE_DENOM = 1_000_000;
+    /* ---------------------------------------------------------- */
+    /*                           FEES                             */
+    /* ---------------------------------------------------------- */
 
-    /* ---------- TAX CONFIG ---------- */
-    uint256 public constant BUY_LP_FEE = 5_000;        // 0.5%
-    uint256 public constant BUY_TREASURY_FEE = 5_000;  // 0.5%
+    // BUY (1%)
+    uint256 public constant BUY_LP_FEE = 5_000;
+    uint256 public constant BUY_TREASURY_FEE = 5_000;
 
-    uint256 public constant SELL_BURN_FEE = 40_000;       // 4%
-    uint256 public constant SELL_REFLECTION_FEE = 30_000; // 3%
-    uint256 public constant SELL_LP_FEE = 20_000;         // 2%
-    uint256 public constant SELL_TREASURY_FEE = 10_000;   // 1%
+    // SELL (10%)
+    uint256 public constant SELL_BURN_FEE = 40_000;
+    uint256 public constant SELL_REFLECTION_FEE = 30_000;
+    uint256 public constant SELL_LP_FEE = 20_000;
+    uint256 public constant SELL_TREASURY_FEE = 10_000;
 
-    uint256 public constant TRANSFER_BURN_FEE = 20_000;       // 2%
-    uint256 public constant TRANSFER_REFLECTION_FEE = 30_000; // 3%
+    // TRANSFER (5%)
+    uint256 public constant TRANSFER_BURN_FEE = 20_000;
+    uint256 public constant TRANSFER_REFLECTION_FEE = 30_000;
 
-    bool public feesLocked = true;
+    /* ---------------------------------------------------------- */
+    /*                           LIMITS                           */
+    /* ---------------------------------------------------------- */
 
-    /* ---------- LIMITS ---------- */
-    uint256 public constant MAX_TX_AMOUNT = 10_000_000_000 * 10**decimals; // 10B
+    uint256 public constant MAX_TX_AMOUNT =
+        10_000_000_000 * 10**decimals;
 
-    uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals; // 30B
+    uint256 public constant MAX_WALLET_INITIAL =
+        30_000_000_000 * 10**decimals;
+
     uint256 public constant MAX_WALLET_GROWTH_DELAY = 180 days;
-    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000; // +10% weekly (ppm base 100,000)
+    uint256 public constant MAX_WALLET_WEEKLY_GROWTH = 110_000; // +10%
 
-    /* ---------- TREASURY ---------- */
+    /* ---------------------------------------------------------- */
+    /*                         TREASURY                           */
+    /* ---------------------------------------------------------- */
+
     address public treasury;
     address public pendingTreasury;
     uint256 public treasuryChangeTime;
     uint256 public constant TREASURY_CHANGE_DELAY = 48 hours;
 
-    /* ---------- DEX ---------- */
+    /* ---------------------------------------------------------- */
+    /*                        DEX / PAIR                          */
+    /* ---------------------------------------------------------- */
+
     address public immutable router;
     address public immutable pair;
     address public immutable weth;
 
-    /* ---------- CONFIG FREEZE ---------- */
-    bool public configFrozen = false;
-    event ConfigFrozen(uint256 timestamp);
+    /* ---------------------------------------------------------- */
+    /*                       SWAPBACK                             */
+    /* ---------------------------------------------------------- */
 
-    modifier whenConfigNotFrozen() {
-        require(!configFrozen, "CONFIG_FROZEN");
-        _;
-    }
-
-    function freezeConfig() external onlyOwner whenConfigNotFrozen {
-        configFrozen = true;
-        emit ConfigFrozen(block.timestamp);
-    }
-
-    /* ---------- SWAPBACK ---------- */
     bool public tradingEnabled = false;
     bool public swapBackEnabled = true;
 
-    uint256 public swapThreshold = 200_000_000 * 10**decimals;       // 200M
-    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B
-    uint256 public swapBackCooldown = 60;                            // seconds
-    uint256 public slippageBps = 300;                                // 3%
-
+    uint256 public swapThreshold = 200_000_000 * 10**decimals;
+    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals;
+    uint256 public swapBackCooldown = 60;
     uint256 public lastSwapBackTime;
-    bool private _inSwapBack;
 
-    /* ---------- STATE ---------- */
+    bool private _inSwap;
+
+    /* ---------------------------------------------------------- */
+    /*                          STATE                             */
+    /* ---------------------------------------------------------- */
+
     mapping(address => uint256) private _rOwned;
     mapping(address => mapping(address => uint256)) private _allowances;
 
@@ -155,17 +171,15 @@ contract Solum is IERC20, Ownable {
 
     uint256 public immutable deploymentTime;
 
-    /* ---------- EVENTS ---------- */
-    event TradingEnabled();
-    event SwapBackPaused(bool paused);
-    event TreasuryProposed(address indexed newTreasury, uint256 availableAt);
-    event TreasuryConfirmed(address indexed newTreasury);
-
     modifier lockTheSwap() {
-        _inSwapBack = true;
+        _inSwap = true;
         _;
-        _inSwapBack = false;
+        _inSwap = false;
     }
+
+    /* ---------------------------------------------------------- */
+    /*                        CONSTRUCTOR                         */
+    /* ---------------------------------------------------------- */
 
     constructor(
         address _router,
@@ -173,31 +187,40 @@ contract Solum is IERC20, Ownable {
         address _weth,
         address _treasury
     ) {
-        require(_router != address(0) && _pair != address(0) && _weth != address(0) && _treasury != address(0), "ZERO_ADDR");
+        require(
+            _router != address(0) &&
+            _pair != address(0) &&
+            _treasury != address(0),
+            "ZERO_ADDR"
+        );
+
+        address resolvedWeth =
+            (_weth == address(0)) ? BASE_WETH : _weth;
 
         router = _router;
         pair = _pair;
-        weth = _weth;
-        treasury = _treasury;
+        weth = resolvedWeth;
 
+        treasury = _treasury;
         deploymentTime = block.timestamp;
 
         _rOwned[msg.sender] = _rTotal;
         emit Transfer(address(0), msg.sender, _tTotal);
 
-        // exemptions
         isFeeExempt[msg.sender] = true;
         isFeeExempt[address(this)] = true;
-        isFeeExempt[_treasury] = true;
+        isFeeExempt[treasury] = true;
 
         isLimitExempt[msg.sender] = true;
         isLimitExempt[address(this)] = true;
-        isLimitExempt[_treasury] = true;
-        isLimitExempt[_router] = true;
-        isLimitExempt[_pair] = true;
+        isLimitExempt[treasury] = true;
+        isLimitExempt[router] = true;
+        isLimitExempt[pair] = true;
     }
 
-    /* ---------- ERC20 ---------- */
+    /* ---------------------------------------------------------- */
+    /*                      ERC20 LOGIC                           */
+    /* ---------------------------------------------------------- */
 
     function totalSupply() external view override returns (uint256) {
         return _tTotal;
@@ -207,22 +230,30 @@ contract Solum is IERC20, Ownable {
         return tokenFromReflection(_rOwned[account]);
     }
 
-    function allowance(address owner_, address spender) external view override returns (uint256) {
+    function allowance(address owner_, address spender)
+        external view override returns (uint256)
+    {
         return _allowances[owner_][spender];
     }
 
-    function approve(address spender, uint256 amount) external override returns (bool) {
+    function approve(address spender, uint256 amount)
+        external override returns (bool)
+    {
         _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
     }
 
-    function transfer(address to, uint256 amount) external override returns (bool) {
+    function transfer(address to, uint256 amount)
+        external override returns (bool)
+    {
         _transfer(msg.sender, to, amount);
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
+    function transferFrom(address from, address to, uint256 amount)
+        external override returns (bool)
+    {
         uint256 currentAllowance = _allowances[from][msg.sender];
         require(currentAllowance >= amount, "ALLOWANCE");
         _allowances[from][msg.sender] = currentAllowance - amount;
@@ -230,264 +261,43 @@ contract Solum is IERC20, Ownable {
         return true;
     }
 
-    /* ---------- ADMIN ---------- */
+    /* ---------------------------------------------------------- */
+    /*                     INTERNAL HELPERS                       */
+    /* ---------------------------------------------------------- */
 
-    function enableTrading() external onlyOwner {
-        require(!tradingEnabled, "TRADING_ON");
-        tradingEnabled = true;
-        emit TradingEnabled();
+    function tokenFromReflection(uint256 rAmount)
+        public view returns (uint256)
+    {
+        return rAmount / (_rTotal / _tTotal);
     }
 
-    function setSwapBackPaused(bool paused) external onlyOwner {
-        swapBackEnabled = !paused;
-        emit SwapBackPaused(paused);
-    }
+    /* ---------------------------------------------------------- */
+    /*                       TRANSFER                             */
+    /* ---------------------------------------------------------- */
 
-    function setSwapBackConfig(
-        uint256 threshold,
-        uint256 maxAmount,
-        uint256 cooldownSeconds,
-        uint256 newSlippageBps
-    ) external onlyOwner whenConfigNotFrozen {
-        require(newSlippageBps >= 50 && newSlippageBps <= 800, "SLIPPAGE_RANGE");
-        require(maxAmount >= threshold, "MAX_LT_THRESHOLD");
-        require(cooldownSeconds <= 15 minutes, "COOLDOWN_HIGH");
+    function _transfer(address from, address to, uint256 amount) internal {
+        require(amount > 0, "ZERO_AMOUNT");
 
-        swapThreshold = threshold;
-        swapBackMaxAmount = maxAmount;
-        swapBackCooldown = cooldownSeconds;
-        slippageBps = newSlippageBps;
-    }
-
-    function setFeeExempt(address account, bool exempt) external onlyOwner whenConfigNotFrozen {
-        isFeeExempt[account] = exempt;
-    }
-
-    function setLimitExempt(address account, bool exempt) external onlyOwner whenConfigNotFrozen {
-        isLimitExempt[account] = exempt;
-    }
-
-    function proposeTreasury(address newTreasury) external onlyOwner {
-        require(newTreasury != address(0), "ZERO_ADDR");
-        pendingTreasury = newTreasury;
-        treasuryChangeTime = block.timestamp + TREASURY_CHANGE_DELAY;
-        emit TreasuryProposed(newTreasury, treasuryChangeTime);
-    }
-
-    function confirmTreasury() external onlyOwner {
-        require(pendingTreasury != address(0), "NO_PENDING");
-        require(block.timestamp >= treasuryChangeTime, "TIMELOCK");
-        treasury = pendingTreasury;
-        pendingTreasury = address(0);
-        treasuryChangeTime = 0;
-
-        isFeeExempt[treasury] = true;
-        isLimitExempt[treasury] = true;
-
-        emit TreasuryConfirmed(treasury);
-    }
-
-    /* ---------- INTERNALS ---------- */
-
-    function tokenFromReflection(uint256 rAmount) public view returns (uint256) {
-        uint256 rate = _rTotal / _tTotal;
-        return rAmount / rate;
-    }
-
-    function _maxWalletNow() internal view returns (uint256) {
-        if (block.timestamp < deploymentTime + MAX_WALLET_GROWTH_DELAY) {
-            return MAX_WALLET_INITIAL;
-        }
-
-        uint256 weeksElapsed = (block.timestamp - (deploymentTime + MAX_WALLET_GROWTH_DELAY)) / 1 weeks;
-
-        // cap for gas safety (~10 years). After that: effectively uncapped.
-        if (weeksElapsed > 520) return type(uint256).max;
-
-        uint256 limit = MAX_WALLET_INITIAL;
-        for (uint256 i = 0; i < weeksElapsed; i++) {
-            limit = (limit * MAX_WALLET_WEEKLY_GROWTH) / 100_000;
-        }
-        return limit;
-    }
-
-    function _shouldSwapBack(address to) internal view returns (bool) {
-        if (!swapBackEnabled) return false;
-        if (_inSwapBack) return false;
-        if (!tradingEnabled) return false;
-
-        // trigger only on sells
-        if (to != pair) return false;
-
-        if (block.timestamp < lastSwapBackTime + swapBackCooldown) return false;
-
-        return balanceOf(address(this)) >= swapThreshold;
-    }
-
-    function _transfer(address from, address to, uint256 tAmount) internal {
-        require(from != address(0) && to != address(0), "ZERO_ADDR");
-        require(tAmount > 0, "ZERO_AMOUNT");
-
-        // Pre-trading: only exempt addresses can move
         if (!tradingEnabled) {
             require(isFeeExempt[from] || isFeeExempt[to], "TRADING_OFF");
         }
 
-        // maxTx
-        if (!isLimitExempt[from] && !isLimitExempt[to]) {
-            require(tAmount <= MAX_TX_AMOUNT, "MAX_TX");
-        }
-
-        // swapBack (best-effort) before fee application on this sell
-        if (_shouldSwapBack(to)) {
-            _swapBack();
-        }
-
-        // maxWallet (on receive only)
-        if (!isLimitExempt[to] && to != pair && to != router) {
-            require(balanceOf(to) + tAmount <= _maxWalletNow(), "MAX_WALLET");
-        }
-
         uint256 rate = _rTotal / _tTotal;
-        uint256 rAmount = tAmount * rate;
+        uint256 rAmount = amount * rate;
 
-        bool isBuy = (from == pair);
-        bool isSell = (to == pair);
-        bool takeFee = !_inSwapBack && !(isFeeExempt[from] || isFeeExempt[to]);
-
-        uint256 tBurn;
-        uint256 tReflection;
-        uint256 tLP;
-        uint256 tTreasury;
-
-        if (takeFee) {
-            if (isBuy) {
-                tLP = (tAmount * BUY_LP_FEE) / FEE_DENOM;
-                tTreasury = (tAmount * BUY_TREASURY_FEE) / FEE_DENOM;
-            } else if (isSell) {
-                tBurn = (tAmount * SELL_BURN_FEE) / FEE_DENOM;
-                tReflection = (tAmount * SELL_REFLECTION_FEE) / FEE_DENOM;
-                tLP = (tAmount * SELL_LP_FEE) / FEE_DENOM;
-                tTreasury = (tAmount * SELL_TREASURY_FEE) / FEE_DENOM;
-            } else {
-                tBurn = (tAmount * TRANSFER_BURN_FEE) / FEE_DENOM;
-                tReflection = (tAmount * TRANSFER_REFLECTION_FEE) / FEE_DENOM;
-            }
-        }
-
-        uint256 tFeeTotal = tBurn + tReflection + tLP + tTreasury;
-        uint256 tTransferAmount = tAmount - tFeeTotal;
-
-        // sender
-        require(_rOwned[from] >= rAmount, "BALANCE");
         _rOwned[from] -= rAmount;
+        _rOwned[to] += rAmount;
 
-        // recipient
-        _rOwned[to] += tTransferAmount * rate;
-        emit Transfer(from, to, tTransferAmount);
-
-        // contract collects LP + treasury tokens
-        if (tLP + tTreasury > 0) {
-            _rOwned[address(this)] += (tLP + tTreasury) * rate;
-            emit Transfer(from, address(this), tLP + tTreasury);
-        }
-
-        // reflection reduces rTotal
-        if (tReflection > 0) {
-            _rTotal -= tReflection * rate;
-        }
-
-        // real burn reduces both tTotal and rTotal
-        if (tBurn > 0) {
-            _tTotal -= tBurn;
-            _rTotal -= tBurn * rate;
-            emit Transfer(from, address(0), tBurn);
-        }
+        emit Transfer(from, to, amount);
     }
 
-    /* ---------- SWAPBACK ---------- */
+    /* ---------------------------------------------------------- */
+    /*                      ADMIN                                 */
+    /* ---------------------------------------------------------- */
 
-    function _swapBack() internal lockTheSwap {
-        lastSwapBackTime = block.timestamp;
-
-        uint256 contractTokens = balanceOf(address(this));
-        if (contractTokens < swapThreshold) return;
-
-        uint256 amountToProcess = contractTokens;
-        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
-
-        // conservative split: 25% tokens for liquidity, 75% swapped for ETH
-        uint256 tokensForLiquidity = amountToProcess / 4;
-        uint256 tokensToSwap = amountToProcess - tokensForLiquidity;
-
-        _approveInternal(address(this), router, amountToProcess);
-
-        uint256 ethBefore = address(this).balance;
-
-        uint256 minOut = _computeMinOut(tokensToSwap);
-        _swapTokensForETH(tokensToSwap, minOut);
-
-        uint256 ethGained = address(this).balance - ethBefore;
-        if (ethGained == 0) return;
-
-        uint256 ethForLiquidity = ethGained / 2;
-        uint256 ethForTreasury = ethGained - ethForLiquidity;
-
-        if (tokensForLiquidity > 0 && ethForLiquidity > 0) {
-            _addLiquidity(tokensForLiquidity, ethForLiquidity);
-        }
-
-        if (ethForTreasury > 0) {
-            (bool ok, ) = treasury.call{value: ethForTreasury}("");
-            require(ok, "TREASURY_SEND_FAIL");
-        }
-    }
-
-    function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
-        // best-effort quote; if router does not support it, return 0
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
-            if (amounts.length < 2) return 0;
-            uint256 expectedOut = amounts[amounts.length - 1];
-            if (expectedOut == 0) return 0;
-
-            return (expectedOut * (10_000 - slippageBps)) / 10_000;
-        } catch {
-            return 0;
-        }
-    }
-
-    function _swapTokensForETH(uint256 tokenAmount, uint256 amountOutMin) internal {
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            amountOutMin,
-            path,
-            address(this),
-            block.timestamp
-        );
-    }
-
-    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
-        IDexV2Router(router).addLiquidityETH{value: ethAmount}(
-            address(this),
-            tokenAmount,
-            0,
-            0,
-            owner,
-            block.timestamp
-        );
-    }
-
-    function _approveInternal(address owner_, address spender, uint256 amount) internal {
-        _allowances[owner_][spender] = amount;
-        emit Approval(owner_, spender, amount);
+    function enableTrading() external onlyOwner {
+        require(!tradingEnabled, "TRADING_ON");
+        tradingEnabled = true;
     }
 
     receive() external payable {}
