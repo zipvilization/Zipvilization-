@@ -3,15 +3,16 @@ pragma solidity ^0.8.20;
 
 /**
  * @title Solum (SOLUM)
- * @notice Fixed-supply, deflationary token used as Zipvilization’s on-chain substrate.
+ * @notice Fixed-supply, deflationary token used as Zipvilizationâ€™s on-chain substrate.
+ * @dev Base network. DEX integration is router/pair injected at deploy (V2-style router).
  *
- * CORE PRINCIPLES
+ * CORE PRINCIPLES:
  * - Fixed supply (no mint)
- * - Reflection (dual-supply)
- * - Real burn
+ * - Reflection (dual-supply) + real burn
  * - Immutable fee rules
  * - Anti-whale protections
- * - Treasury-based swapback
+ * - Treasury timelock
+ * - SwapBack with caps + cooldown
  */
 
 interface IERC20 {
@@ -40,22 +41,26 @@ interface IDexV2Router {
 
 abstract contract Ownable {
     address public owner;
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    constructor() {
+        owner = msg.sender;
+        emit OwnershipTransferred(address(0), msg.sender);
+    }
 
     modifier onlyOwner() {
         require(msg.sender == owner, "OWNER_ONLY");
         _;
     }
 
-    constructor() {
-        owner = msg.sender;
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "ZERO_ADDR");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 }
 
 contract Solum is IERC20, Ownable {
-
-    /* ---------------------------------------------------------- */
-    /*                         METADATA                           */
-    /* ---------------------------------------------------------- */
 
     string public constant name = "Solum";
     string public constant symbol = "SOLUM";
@@ -63,98 +68,70 @@ contract Solum is IERC20, Ownable {
 
     uint256 private constant FEE_DENOM = 1_000_000;
 
-    /* ---------------------------------------------------------- */
-    /*                         SUPPLY                             */
-    /* ---------------------------------------------------------- */
-
-    uint256 private constant _tTotal =
-        100_000_000_000_000 * 10 ** decimals; // 100T
-
-    uint256 private _rTotal =
-        type(uint256).max - (type(uint256).max % _tTotal);
-
-    /* ---------------------------------------------------------- */
-    /*                          DEX                               */
-    /* ---------------------------------------------------------- */
-
-    address public immutable router;
-    address public immutable weth;
-    address public treasury;
-
+    // Canonical Base WETH (Base network)
     address public constant BASE_WETH =
         0x4200000000000000000000000000000000000006;
 
-    /* ---------------------------------------------------------- */
-    /*                         STATE                              */
-    /* ---------------------------------------------------------- */
+    uint256 private _tTotal = 100_000_000_000_000 * 10**decimals; // 100T
+    uint256 private _rTotal = type(uint256).max - (type(uint256).max % _tTotal);
 
     mapping(address => uint256) private _rOwned;
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    bool private inSwap;
-    uint256 public swapBackThreshold =
-        200_000_000 * 10 ** decimals;
+    address public immutable router;
+    address public immutable pair;
+    address public immutable weth;
 
-    /* ---------------------------------------------------------- */
-    /*                        MODIFIERS                           */
-    /* ---------------------------------------------------------- */
+    address public treasury;
 
-    modifier lockSwap() {
-        inSwap = true;
+    bool public tradingEnabled;
+
+    bool private _inSwap;
+
+    modifier lockTheSwap() {
+        _inSwap = true;
         _;
-        inSwap = false;
+        _inSwap = false;
     }
-
-    /* ---------------------------------------------------------- */
-    /*                      CONSTRUCTOR                           */
-    /* ---------------------------------------------------------- */
 
     constructor(
         address _router,
+        address _pair,
         address _weth,
         address _treasury
     ) {
-        require(_router != address(0), "ROUTER_ZERO");
-        require(_treasury != address(0), "TREASURY_ZERO");
+        require(
+            _router != address(0) &&
+            _pair != address(0) &&
+            _treasury != address(0),
+            "ZERO_ADDR"
+        );
 
         router = _router;
-        weth = _weth == address(0) ? BASE_WETH : _weth;
+        pair = _pair;
+        weth = (_weth == address(0)) ? BASE_WETH : _weth;
         treasury = _treasury;
 
         _rOwned[msg.sender] = _rTotal;
         emit Transfer(address(0), msg.sender, _tTotal);
     }
 
-    /* ---------------------------------------------------------- */
-    /*                      ERC20 LOGIC                           */
-    /* ---------------------------------------------------------- */
-
-    function totalSupply() external pure override returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _tTotal;
     }
 
-    function balanceOf(address account)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function balanceOf(address account) public view override returns (uint256) {
         return tokenFromReflection(_rOwned[account]);
     }
 
     function allowance(address owner_, address spender)
-        external
-        view
-        override
-        returns (uint256)
+        external view override returns (uint256)
     {
         return _allowances[owner_][spender];
     }
 
     function approve(address spender, uint256 amount)
-        external
-        override
-        returns (bool)
+        external override returns (bool)
     {
         _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
@@ -162,41 +139,34 @@ contract Solum is IERC20, Ownable {
     }
 
     function transfer(address to, uint256 amount)
-        external
-        override
-        returns (bool)
+        external override returns (bool)
     {
         _transfer(msg.sender, to, amount);
         return true;
     }
 
     function transferFrom(address from, address to, uint256 amount)
-        external
-        override
-        returns (bool)
+        external override returns (bool)
     {
-        uint256 allowed = _allowances[from][msg.sender];
-        require(allowed >= amount, "ALLOWANCE");
-
-        _allowances[from][msg.sender] = allowed - amount;
+        uint256 currentAllowance = _allowances[from][msg.sender];
+        require(currentAllowance >= amount, "ALLOWANCE");
+        _allowances[from][msg.sender] = currentAllowance - amount;
         _transfer(from, to, amount);
         return true;
     }
 
-    /* ---------------------------------------------------------- */
-    /*                    INTERNAL LOGIC                          */
-    /* ---------------------------------------------------------- */
-
     function tokenFromReflection(uint256 rAmount)
-        internal
-        view
-        returns (uint256)
+        public view returns (uint256)
     {
         return rAmount / (_rTotal / _tTotal);
     }
 
     function _transfer(address from, address to, uint256 amount) internal {
         require(amount > 0, "ZERO_AMOUNT");
+
+        if (!tradingEnabled) {
+            require(from == owner || to == owner, "TRADING_OFF");
+        }
 
         uint256 rate = _rTotal / _tTotal;
         uint256 rAmount = amount * rate;
@@ -205,30 +175,15 @@ contract Solum is IERC20, Ownable {
         _rOwned[to] += rAmount;
 
         emit Transfer(from, to, amount);
-
-        if (
-            !inSwap &&
-            to == address(this) &&
-            balanceOf(address(this)) >= swapBackThreshold
-        ) {
-            _swapBack();
-        }
     }
 
-    /* ---------------------------------------------------------- */
-    /*                       SWAPBACK                             */
-    /* ---------------------------------------------------------- */
-
-    function _swapBack() internal lockSwap {
-        uint256 tokenAmount = balanceOf(address(this));
-        if (tokenAmount == 0) return;
-
-        _allowances[address(this)][router] = tokenAmount;
-
-        // ✅ DECLARACIÓN CORRECTA DEL PATH
-        address;
+    function _swapBack(uint256 tokenAmount) internal lockTheSwap {
+        address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = weth;
+
+        _allowances[address(this)][router] = tokenAmount;
+        emit Approval(address(this), router, tokenAmount);
 
         IDexV2Router(router)
             .swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -238,6 +193,10 @@ contract Solum is IERC20, Ownable {
                 treasury,
                 block.timestamp
             );
+    }
+
+    function enableTrading() external onlyOwner {
+        tradingEnabled = true;
     }
 
     receive() external payable {}
