@@ -4,24 +4,28 @@ pragma solidity ^0.8.20;
 /**
  * @title Solum (SOLUM)
  * @notice Fixed-supply, deflationary token used as Zipvilization’s on-chain substrate.
- * @dev Base network. Router/Pair/WETH are injected at deploy (V2-style router, Aerodrome-compatible).
+ * @dev Base network. Deploy using a V2-style router compatible with:
+ *      - swapExactTokensForETHSupportingFeeOnTransferTokens
+ *      - addLiquidityETH
+ *      - getAmountsOut (optional; used for best-effort minOut)
  *
- * CANONICAL CORE (FULL)
- * - Fixed supply (no mint)
+ * CORE PRINCIPLES:
+ * - Fixed supply (no mint, no inflation)
  * - Reflection (dual-supply) + real burn (supply decreases)
- * - Immutable buy/sell/transfer fee rules (constants)
- * - Anti-whale: maxTx (fixed) + maxWallet (dynamic growth after delay)
- * - Treasury timelock: propose / confirm with delay
- * - SwapBack controls: pause + cooldown + cap + best-effort slippage guard
+ * - Anti-whale protections (maxTx + dynamic maxWallet)
+ * - Treasury timelock (propose/confirm)
+ * - SwapBack controls (pause + cooldown + cap + best-effort slippage guard)
+ * - Fee policy: ONLY-DECREASING, timelocked, max 5 changes per tx-type
  *
- * IMPORTANT
- * - No references to any external project names/lore. This repo is Zipvilization-only.
- * - If a rule is not in this contract, it does not exist on-chain.
+ * FEES (TOTAL-ONLY, INDEPENDENT):
+ * - BUY fee total  (split fixed 50% LP / 50% Treasury)
+ * - SELL fee total (split fixed 4/3/2/1 Burn/Reflection/LP/Treasury)
+ * - TRANSFER fee total (split fixed 2/3 Burn/Reflection)
+ *
+ * IMPORTANT:
+ * - Pair address MUST be injected correctly at deployment.
+ * - This contract is self-contained (no external deps).
  */
-
-/* ============================== */
-/* ======== INTERFACES ========== */
-/* ============================== */
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
@@ -35,6 +39,9 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+/**
+ * @dev Minimal V2-style router interface.
+ */
 interface IDexV2Router {
     function WETH() external view returns (address);
 
@@ -61,10 +68,9 @@ interface IDexV2Router {
     ) external;
 }
 
-/* ============================== */
-/* ============ OWNABLE ========= */
-/* ============================== */
-
+/**
+ * @dev Minimal Ownable (no external deps).
+ */
 abstract contract Ownable {
     address public owner;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -86,78 +92,84 @@ abstract contract Ownable {
     }
 }
 
-/* ============================== */
-/* ========== CONTRACT ========== */
-/* ============================== */
-
-contract Solum is IERC20, Ownable {
-
+contract SolumToken is IERC20, Ownable {
     /* ---------- METADATA ---------- */
-
     string public constant name = "Solum";
     string public constant symbol = "SOLUM";
-    uint8 public constant decimals = 18;
+    uint8  public constant decimals = 18;
 
     /* ---------- SUPPLY (DUAL) ---------- */
-
     uint256 private _tTotal = 100_000_000_000_000 * 10**decimals; // 100T
     uint256 private _rTotal = type(uint256).max - (type(uint256).max % _tTotal);
 
-    /* ---------- FEE DENOM ---------- */
+    /* ---------- DENOMS ---------- */
+    uint256 private constant FEE_DENOM = 1_000_000;  // ppm
+    uint256 private constant BPS_DENOM = 10_000;     // basis points
 
-    uint256 private constant FEE_DENOM = 1_000_000;
+    /* ---------- INITIAL FEE TOTALS (ppm) ---------- */
+    // BUY: 1% total
+    uint256 public constant BUY_FEE_INITIAL = 10_000;
+    // SELL: 10% total
+    uint256 public constant SELL_FEE_INITIAL = 100_000;
+    // TRANSFER: 5% total
+    uint256 public constant TRANSFER_FEE_INITIAL = 50_000;
 
-    /* ---------- TAX CONFIG (IMMUTABLE CONSTANTS) ---------- */
-    // BUY: 0.5% LP + 0.5% Treasury (1%)
-    uint256 public constant BUY_LP_FEE = 5_000;        // 0.5%
-    uint256 public constant BUY_TREASURY_FEE = 5_000;  // 0.5%
+    /* ---------- FEE TOTALS (MUTABLE, ONLY-DECREASING) ---------- */
+    uint256 public buyFeeTotal;       // ppm
+    uint256 public sellFeeTotal;      // ppm
+    uint256 public transferFeeTotal;  // ppm
 
-    // SELL: 4% burn, 3% reflection, 2% LP, 1% treasury (10%)
-    uint256 public constant SELL_BURN_FEE = 40_000;       // 4%
-    uint256 public constant SELL_REFLECTION_FEE = 30_000; // 3%
-    uint256 public constant SELL_LP_FEE = 20_000;         // 2%
-    uint256 public constant SELL_TREASURY_FEE = 10_000;   // 1%
+    /* ---------- FEE CHANGE POLICY ---------- */
+    uint8 public constant FEE_MAX_CHANGES = 5;
+    uint256 public constant FEE_TIMELOCK = 24 hours;
 
-    // TRANSFER: 2% burn, 3% reflection (5%)
-    uint256 public constant TRANSFER_BURN_FEE = 20_000;       // 2%
-    uint256 public constant TRANSFER_REFLECTION_FEE = 30_000; // 3%
+    // BUY fee change state
+    uint256 public pendingBuyFeeTotal;
+    uint256 public buyFeeChangeTime;
+    uint8   public buyFeeChangesUsed;
+    bool    public buyFeeFrozen;
+
+    // SELL fee change state
+    uint256 public pendingSellFeeTotal;
+    uint256 public sellFeeChangeTime;
+    uint8   public sellFeeChangesUsed;
+    bool    public sellFeeFrozen;
+
+    // TRANSFER fee change state
+    uint256 public pendingTransferFeeTotal;
+    uint256 public transferFeeChangeTime;
+    uint8   public transferFeeChangesUsed;
+    bool    public transferFeeFrozen;
 
     /* ---------- LIMITS ---------- */
-
     uint256 public constant MAX_TX_AMOUNT = 10_000_000_000 * 10**decimals; // 10B fixed
-
     uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals; // 30B
     uint256 public constant MAX_WALLET_GROWTH_DELAY = 180 days;
-    uint256 public constant MAX_WALLET_WEEKLY_GROWTH_PPM = 110_000; // +10% weekly, ppm base 100_000
 
     /* ---------- TREASURY TIMELOCK ---------- */
-
     address public treasury;
     address public pendingTreasury;
     uint256 public treasuryChangeTime;
     uint256 public constant TREASURY_CHANGE_DELAY = 48 hours;
 
     /* ---------- DEX / PAIR ---------- */
-
     address public immutable router;
     address public immutable pair;
     address public immutable weth;
 
     /* ---------- SWAPBACK CONTROLS ---------- */
-
-    bool public tradingEnabled = false;
     bool public swapBackEnabled = true;
+    bool public tradingEnabled = false;
 
-    uint256 public swapThreshold = 200_000_000 * 10**decimals;       // 200M
-    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B
-    uint256 public swapBackCooldown = 60; // seconds
-    uint256 public slippageBps = 300; // 3% (basis points)
+    uint256 public swapThreshold = 200_000_000 * 10**decimals;      // 200M tokens (tune)
+    uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B tokens max per swap (tune)
+    uint256 public swapBackCooldown = 60;                           // seconds (tune)
+    uint256 public slippageBps = 300;                               // 3% in bps (tune 50..800 typical)
 
     uint256 public lastSwapBackTime;
     bool private _inSwapBack;
 
     /* ---------- STATE ---------- */
-
     mapping(address => uint256) private _rOwned;
     mapping(address => mapping(address => uint256)) private _allowances;
 
@@ -166,15 +178,28 @@ contract Solum is IERC20, Ownable {
 
     uint256 public immutable deploymentTime;
 
-    /* ---------- EVENTS ---------- */
+    // accounting for swapBack buckets (accurate)
+    uint256 private _tokensForLiquidity; // token units (tAmount)
+    uint256 private _tokensForTreasury;  // token units (tAmount)
 
+    /* ---------- EVENTS ---------- */
     event TradingEnabled();
     event SwapBackPaused(bool paused);
     event TreasuryProposed(address indexed newTreasury, uint256 availableAt);
     event TreasuryConfirmed(address indexed newTreasury);
     event SwapBackConfigUpdated(uint256 threshold, uint256 maxAmount, uint256 cooldown, uint256 slippageBps);
-    event FeeExemptSet(address indexed account, bool exempt);
-    event LimitExemptSet(address indexed account, bool exempt);
+
+    event BuyFeeProposed(uint256 newTotalFee, uint256 availableAt);
+    event BuyFeeApplied(uint256 newTotalFee, uint8 changesUsed);
+    event BuyFeeFrozen(uint8 changesUsed);
+
+    event SellFeeProposed(uint256 newTotalFee, uint256 availableAt);
+    event SellFeeApplied(uint256 newTotalFee, uint8 changesUsed);
+    event SellFeeFrozen(uint8 changesUsed);
+
+    event TransferFeeProposed(uint256 newTotalFee, uint256 availableAt);
+    event TransferFeeApplied(uint256 newTotalFee, uint8 changesUsed);
+    event TransferFeeFrozen(uint8 changesUsed);
 
     modifier lockTheSwap() {
         _inSwapBack = true;
@@ -182,24 +207,26 @@ contract Solum is IERC20, Ownable {
         _inSwapBack = false;
     }
 
-    /* ============================== */
-    /* ========= CONSTRUCTOR ======== */
-    /* ============================== */
-
     constructor(
         address _router,
         address _pair,
-        address _weth,
         address _treasury
     ) {
-        require(_router != address(0) && _pair != address(0) && _weth != address(0) && _treasury != address(0), "ZERO_ADDR");
+        require(_router != address(0) && _pair != address(0) && _treasury != address(0), "ZERO_ADDR");
 
         router = _router;
         pair = _pair;
-        weth = _weth;
+
+        weth = IDexV2Router(_router).WETH();
+        require(weth != address(0), "WETH_ZERO");
 
         treasury = _treasury;
         deploymentTime = block.timestamp;
+
+        // init fees
+        buyFeeTotal = BUY_FEE_INITIAL;
+        sellFeeTotal = SELL_FEE_INITIAL;
+        transferFeeTotal = TRANSFER_FEE_INITIAL;
 
         // initial distribution to deployer
         _rOwned[msg.sender] = _rTotal;
@@ -217,13 +244,13 @@ contract Solum is IERC20, Ownable {
         isLimitExempt[_pair] = true;
     }
 
+    receive() external payable {}
+
     /* ============================== */
     /* ======= ERC20 LOGIC ========== */
     /* ============================== */
 
-    function totalSupply() external view override returns (uint256) {
-        return _tTotal;
-    }
+    function totalSupply() external view override returns (uint256) { return _tTotal; }
 
     function balanceOf(address account) public view override returns (uint256) {
         return tokenFromReflection(_rOwned[account]);
@@ -234,7 +261,8 @@ contract Solum is IERC20, Ownable {
     }
 
     function approve(address spender, uint256 amount) external override returns (bool) {
-        _approveInternal(msg.sender, spender, amount);
+        _allowances[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
         return true;
     }
 
@@ -272,7 +300,6 @@ contract Solum is IERC20, Ownable {
         uint256 cooldownSeconds,
         uint256 newSlippageBps
     ) external onlyOwner {
-        // guardrails
         require(newSlippageBps >= 50 && newSlippageBps <= 800, "SLIPPAGE_RANGE");
         require(maxAmount >= threshold, "MAX_LT_THRESHOLD");
         require(cooldownSeconds <= 15 minutes, "COOLDOWN_TOO_HIGH");
@@ -285,15 +312,8 @@ contract Solum is IERC20, Ownable {
         emit SwapBackConfigUpdated(threshold, maxAmount, cooldownSeconds, newSlippageBps);
     }
 
-    function setFeeExempt(address account, bool exempt) external onlyOwner {
-        isFeeExempt[account] = exempt;
-        emit FeeExemptSet(account, exempt);
-    }
-
-    function setLimitExempt(address account, bool exempt) external onlyOwner {
-        isLimitExempt[account] = exempt;
-        emit LimitExemptSet(account, exempt);
-    }
+    function setFeeExempt(address account, bool exempt) external onlyOwner { isFeeExempt[account] = exempt; }
+    function setLimitExempt(address account, bool exempt) external onlyOwner { isLimitExempt[account] = exempt; }
 
     /* ---------- Treasury timelock ---------- */
 
@@ -311,7 +331,6 @@ contract Solum is IERC20, Ownable {
         pendingTreasury = address(0);
         treasuryChangeTime = 0;
 
-        // keep exemptions aligned
         isFeeExempt[treasury] = true;
         isLimitExempt[treasury] = true;
 
@@ -319,27 +338,110 @@ contract Solum is IERC20, Ownable {
     }
 
     /* ============================== */
-    /* ========= REFLECTION ========= */
+    /* ====== FEE REDUCTIONS ======== */
     /* ============================== */
 
-    function _getRate() internal view returns (uint256) {
-        // _tTotal can only decrease via real burn; rate stays well-defined
-        return _rTotal / _tTotal;
+    // ---- BUY ----
+    function proposeBuyFeeReduction(uint256 newTotalFee) external onlyOwner {
+        require(!buyFeeFrozen, "BUY_FEE_FROZEN");
+        require(buyFeeChangesUsed < FEE_MAX_CHANGES, "BUY_FEE_MAX_CHANGES");
+        require(newTotalFee <= buyFeeTotal, "ONLY_DECREASING");
+        require(newTotalFee <= BUY_FEE_INITIAL, "ABOVE_INITIAL");
+        pendingBuyFeeTotal = newTotalFee;
+        buyFeeChangeTime = block.timestamp + FEE_TIMELOCK;
+        emit BuyFeeProposed(newTotalFee, buyFeeChangeTime);
+    }
+
+    function confirmBuyFeeReduction() external onlyOwner {
+        require(buyFeeChangeTime != 0, "NO_PENDING");
+        require(block.timestamp >= buyFeeChangeTime, "TIMELOCK");
+        buyFeeTotal = pendingBuyFeeTotal;
+        pendingBuyFeeTotal = 0;
+        buyFeeChangeTime = 0;
+        buyFeeChangesUsed++;
+
+        emit BuyFeeApplied(buyFeeTotal, buyFeeChangesUsed);
+
+        if (buyFeeTotal == 0 || buyFeeChangesUsed >= FEE_MAX_CHANGES) {
+            buyFeeFrozen = true;
+            emit BuyFeeFrozen(buyFeeChangesUsed);
+        }
+    }
+
+    // ---- SELL ----
+    function proposeSellFeeReduction(uint256 newTotalFee) external onlyOwner {
+        require(!sellFeeFrozen, "SELL_FEE_FROZEN");
+        require(sellFeeChangesUsed < FEE_MAX_CHANGES, "SELL_FEE_MAX_CHANGES");
+        require(newTotalFee <= sellFeeTotal, "ONLY_DECREASING");
+        require(newTotalFee <= SELL_FEE_INITIAL, "ABOVE_INITIAL");
+        pendingSellFeeTotal = newTotalFee;
+        sellFeeChangeTime = block.timestamp + FEE_TIMELOCK;
+        emit SellFeeProposed(newTotalFee, sellFeeChangeTime);
+    }
+
+    function confirmSellFeeReduction() external onlyOwner {
+        require(sellFeeChangeTime != 0, "NO_PENDING");
+        require(block.timestamp >= sellFeeChangeTime, "TIMELOCK");
+        sellFeeTotal = pendingSellFeeTotal;
+        pendingSellFeeTotal = 0;
+        sellFeeChangeTime = 0;
+        sellFeeChangesUsed++;
+
+        emit SellFeeApplied(sellFeeTotal, sellFeeChangesUsed);
+
+        if (sellFeeTotal == 0 || sellFeeChangesUsed >= FEE_MAX_CHANGES) {
+            sellFeeFrozen = true;
+            emit SellFeeFrozen(sellFeeChangesUsed);
+        }
+    }
+
+    // ---- TRANSFER ----
+    function proposeTransferFeeReduction(uint256 newTotalFee) external onlyOwner {
+        require(!transferFeeFrozen, "TRANSFER_FEE_FROZEN");
+        require(transferFeeChangesUsed < FEE_MAX_CHANGES, "TRANSFER_FEE_MAX_CHANGES");
+        require(newTotalFee <= transferFeeTotal, "ONLY_DECREASING");
+        require(newTotalFee <= TRANSFER_FEE_INITIAL, "ABOVE_INITIAL");
+        pendingTransferFeeTotal = newTotalFee;
+        transferFeeChangeTime = block.timestamp + FEE_TIMELOCK;
+        emit TransferFeeProposed(newTotalFee, transferFeeChangeTime);
+    }
+
+    function confirmTransferFeeReduction() external onlyOwner {
+        require(transferFeeChangeTime != 0, "NO_PENDING");
+        require(block.timestamp >= transferFeeChangeTime, "TIMELOCK");
+        transferFeeTotal = pendingTransferFeeTotal;
+        pendingTransferFeeTotal = 0;
+        transferFeeChangeTime = 0;
+        transferFeeChangesUsed++;
+
+        emit TransferFeeApplied(transferFeeTotal, transferFeeChangesUsed);
+
+        if (transferFeeTotal == 0 || transferFeeChangesUsed >= FEE_MAX_CHANGES) {
+            transferFeeFrozen = true;
+            emit TransferFeeFrozen(transferFeeChangesUsed);
+        }
+    }
+
+    /* ============================== */
+    /* ========= INTERNALS ========== */
+    /* ============================== */
+
+    function reflectionFromToken(uint256 tAmount) public view returns (uint256) {
+        require(tAmount <= _tTotal, "AMOUNT_GT_SUPPLY");
+        uint256 currentRate = _getRate();
+        return tAmount * currentRate;
     }
 
     function tokenFromReflection(uint256 rAmount) public view returns (uint256) {
-        uint256 rate = _getRate();
-        return rAmount / rate;
+        require(rAmount <= _rTotal, "R_GT_TOTAL");
+        uint256 currentRate = _getRate();
+        return rAmount / currentRate;
     }
 
-    function reflectionFromToken(uint256 tAmount) public view returns (uint256) {
-        uint256 rate = _getRate();
-        return tAmount * rate;
+    function _getRate() internal view returns (uint256) {
+        // rTotal and tTotal always decrease together for real burn
+        return _rTotal / _tTotal;
     }
-
-    /* ============================== */
-    /* ========= LIMITS ============= */
-    /* ============================== */
 
     function _maxWalletNow() internal view returns (uint256) {
         if (block.timestamp < deploymentTime + MAX_WALLET_GROWTH_DELAY) {
@@ -348,22 +450,16 @@ contract Solum is IERC20, Ownable {
 
         uint256 weeksElapsed = (block.timestamp - (deploymentTime + MAX_WALLET_GROWTH_DELAY)) / 1 weeks;
 
-        // cap loop cost: if called years later, avoid pathological gas
-        if (weeksElapsed > 520) {
-            return type(uint256).max;
-        }
+        // Avoid pathological gas far in the future
+        if (weeksElapsed > 520) return type(uint256).max;
 
         uint256 limit = MAX_WALLET_INITIAL;
+        // +10% weekly compounding
         for (uint256 i = 0; i < weeksElapsed; i++) {
-            // limit *= 1.10 (ppm base 100_000)
-            limit = (limit * MAX_WALLET_WEEKLY_GROWTH_PPM) / 100_000;
+            limit = (limit * 110) / 100;
         }
         return limit;
     }
-
-    /* ============================== */
-    /* ========= SWAPBACK =========== */
-    /* ============================== */
 
     function _shouldSwapBack(address from, address to) internal view returns (bool) {
         if (!swapBackEnabled) return false;
@@ -371,8 +467,7 @@ contract Solum is IERC20, Ownable {
         if (!tradingEnabled) return false;
 
         // Trigger primarily on sells
-        bool isSell = (to == pair);
-        if (!isSell) return false;
+        if (to != pair) return false;
 
         if (block.timestamp < lastSwapBackTime + swapBackCooldown) return false;
 
@@ -380,115 +475,11 @@ contract Solum is IERC20, Ownable {
         return contractTokenBalance >= swapThreshold;
     }
 
-    function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        // Best-effort: use getAmountsOut if router supports it; otherwise return 0.
-        try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
-            if (amounts.length == 0) return 0;
-            uint256 out = amounts[amounts.length - 1];
-            // Apply slippageBps (basis points, 10_000 = 100%)
-            return (out * (10_000 - slippageBps)) / 10_000;
-        } catch {
-            return 0;
-        }
-    }
-
-    function _swapTokensForETH(uint256 tokenAmount, uint256 minOut) internal {
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            minOut,
-            path,
-            address(this),
-            block.timestamp
-        );
-    }
-
-    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
-        // approve already set for router
-        IDexV2Router(router).addLiquidityETH{value: ethAmount}(
-            address(this),
-            tokenAmount,
-            0,
-            0,
-            owner, // LP tokens to owner (can be a locker/multisig off-chain)
-            block.timestamp
-        );
-    }
-
-    function _swapBack() internal lockTheSwap {
-        lastSwapBackTime = block.timestamp;
-
-        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
-        if (contractTokenBalance < swapThreshold) return;
-
-        uint256 amountToProcess = contractTokenBalance;
-        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
-
-        // Conservative split:
-        // - 25% kept as tokens for liquidity (paired with ETH)
-        // - 75% swapped to ETH
-        uint256 tokensForLiquidity = amountToProcess / 4;
-        uint256 tokensToSwapForETH = amountToProcess - tokensForLiquidity;
-
-        // Ensure contract has enough reflected balance
-        uint256 rate = _getRate();
-        uint256 rTotalNeeded = (tokensForLiquidity + tokensToSwapForETH) * rate;
-        require(_rOwned[address(this)] >= rTotalNeeded, "CONTRACT_BAL");
-
-        // Deduct reflected tokens from contract BEFORE external calls (reentrancy hygiene)
-        _rOwned[address(this)] -= rTotalNeeded;
-
-        // Approve router to pull tokens
-        _approveInternal(address(this), router, tokensForLiquidity + tokensToSwapForETH);
-
-        uint256 ethBefore = address(this).balance;
-
-        // Swap tokensToSwapForETH for ETH (best-effort minOut)
-        uint256 minOut = _computeMinOut(tokensToSwapForETH);
-        _swapTokensForETH(tokensToSwapForETH, minOut);
-
-        uint256 ethGained = address(this).balance - ethBefore;
-
-        // If swap produced no ETH (e.g., in tests/mocks), just restore the deducted liquidity tokens and exit safely.
-        if (ethGained == 0) {
-            // restore liquidity tokens back to contract reflected balance
-            _rOwned[address(this)] += tokensForLiquidity * rate;
-            return;
-        }
-
-        // Split ETH: 50% liquidity, 50% treasury
-        uint256 ethForLiquidity = ethGained / 2;
-        uint256 ethForTreasury = ethGained - ethForLiquidity;
-
-        if (tokensForLiquidity > 0 && ethForLiquidity > 0) {
-            _addLiquidity(tokensForLiquidity, ethForLiquidity);
-        } else {
-            // restore liquidity tokens if we can't add liquidity
-            _rOwned[address(this)] += tokensForLiquidity * rate;
-        }
-
-        if (ethForTreasury > 0) {
-            (bool ok, ) = treasury.call{value: ethForTreasury}("");
-            require(ok, "TREASURY_SEND_FAIL");
-        }
-    }
-
-    /* ============================== */
-    /* ========= TRANSFER =========== */
-    /* ============================== */
-
     function _transfer(address from, address to, uint256 tAmount) internal {
         require(from != address(0) && to != address(0), "ZERO_ADDR");
         require(tAmount > 0, "ZERO_AMOUNT");
 
-        // Pre-trading: only transfers involving an exempt address
+        // Pre-trading: only exempt addresses can move
         if (!tradingEnabled) {
             require(isFeeExempt[from] || isFeeExempt[to], "TRADING_OFF");
         }
@@ -498,12 +489,11 @@ contract Solum is IERC20, Ownable {
             require(tAmount <= MAX_TX_AMOUNT, "MAX_TX");
         }
 
-        // SwapBack before applying this sell (best-effort)
+        // SwapBack (best-effort, prior to applying this sell)
         if (_shouldSwapBack(from, to)) {
             _swapBack();
         }
 
-        // Determine tx type
         bool isBuy = (from == pair);
         bool isSell = (to == pair);
 
@@ -515,10 +505,10 @@ contract Solum is IERC20, Ownable {
             require(newBal <= _maxWalletNow(), "MAX_WALLET");
         }
 
-        uint256 rate = _getRate();
+        uint256 currentRate = _getRate();
 
         // Convert to reflected amounts
-        uint256 rAmount = tAmount * rate;
+        uint256 rAmount = tAmount * currentRate;
 
         // Fees in token units
         uint256 tBurn;
@@ -528,27 +518,33 @@ contract Solum is IERC20, Ownable {
 
         if (takeFee) {
             if (isBuy) {
-                tLP = (tAmount * BUY_LP_FEE) / FEE_DENOM;
-                tTreasury = (tAmount * BUY_TREASURY_FEE) / FEE_DENOM;
+                uint256 tBuyFee = (tAmount * buyFeeTotal) / FEE_DENOM;
+                // 50/50 LP/Treasury
+                tLP = tBuyFee / 2;
+                tTreasury = tBuyFee - tLP;
             } else if (isSell) {
-                tBurn = (tAmount * SELL_BURN_FEE) / FEE_DENOM;
-                tReflection = (tAmount * SELL_REFLECTION_FEE) / FEE_DENOM;
-                tLP = (tAmount * SELL_LP_FEE) / FEE_DENOM;
-                tTreasury = (tAmount * SELL_TREASURY_FEE) / FEE_DENOM;
+                uint256 tSellFee = (tAmount * sellFeeTotal) / FEE_DENOM;
+                // 4/3/2/1 over 10
+                tBurn = (tSellFee * 4) / 10;
+                tReflection = (tSellFee * 3) / 10;
+                tLP = (tSellFee * 2) / 10;
+                tTreasury = tSellFee - tBurn - tReflection - tLP;
             } else {
-                tBurn = (tAmount * TRANSFER_BURN_FEE) / FEE_DENOM;
-                tReflection = (tAmount * TRANSFER_REFLECTION_FEE) / FEE_DENOM;
+                uint256 tTransferFee = (tAmount * transferFeeTotal) / FEE_DENOM;
+                // 2/3 over 5
+                tBurn = (tTransferFee * 2) / 5;
+                tReflection = tTransferFee - tBurn;
             }
         }
 
         uint256 tFeeTotal = tBurn + tReflection + tLP + tTreasury;
         uint256 tTransferAmount = tAmount - tFeeTotal;
 
-        uint256 rBurn = tBurn * rate;
-        uint256 rReflection = tReflection * rate;
-        uint256 rLP = tLP * rate;
-        uint256 rTreasury = tTreasury * rate;
-        uint256 rTransferAmount = tTransferAmount * rate;
+        uint256 rBurn = tBurn * currentRate;
+        uint256 rReflection = tReflection * currentRate;
+        uint256 rLP = tLP * currentRate;
+        uint256 rTreasury = tTreasury * currentRate;
+        uint256 rTransferAmount = tTransferAmount * currentRate;
 
         // Deduct from sender
         require(_rOwned[from] >= rAmount, "BALANCE");
@@ -558,19 +554,24 @@ contract Solum is IERC20, Ownable {
         _rOwned[to] += rTransferAmount;
         emit Transfer(from, to, tTransferAmount);
 
-        // LP + Treasury fee: collect to contract
+        // Handle LP + Treasury fee: collected to contract (later swapBack)
+        uint256 tToContract = tLP + tTreasury;
         uint256 rToContract = rLP + rTreasury;
         if (rToContract > 0) {
             _rOwned[address(this)] += rToContract;
-            emit Transfer(from, address(this), tLP + tTreasury);
+            emit Transfer(from, address(this), tToContract);
+
+            // accurate bucket accounting
+            _tokensForLiquidity += tLP;
+            _tokensForTreasury += tTreasury;
         }
 
-        // Reflection: reduce rTotal (standard reflect mechanic)
+        // Handle reflection: reduce rTotal (standard reflect mechanic)
         if (rReflection > 0) {
             _rTotal -= rReflection;
         }
 
-        // Real burn: reduce both tTotal and rTotal
+        // Handle real burn: reduce both tTotal and rTotal to keep rate consistent
         if (tBurn > 0) {
             _tTotal -= tBurn;
             _rTotal -= rBurn;
@@ -578,11 +579,124 @@ contract Solum is IERC20, Ownable {
         }
     }
 
+    /* ============================== */
+    /* ========= SWAPBACK =========== */
+    /* ============================== */
+
+    function _swapBack() internal lockTheSwap {
+        lastSwapBackTime = block.timestamp;
+
+        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
+        if (contractTokenBalance < swapThreshold) return;
+
+        uint256 amountToProcess = contractTokenBalance;
+        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
+
+        // total buckets tracked
+        uint256 totalBucket = _tokensForLiquidity + _tokensForTreasury;
+        if (totalBucket == 0) return;
+
+        // scale buckets if processing less than totalBucket
+        uint256 liqTokens = _tokensForLiquidity;
+        uint256 treTokens = _tokensForTreasury;
+
+        if (amountToProcess < totalBucket) {
+            liqTokens = (liqTokens * amountToProcess) / totalBucket;
+            treTokens = amountToProcess - liqTokens; // remainder
+        } else {
+            // process entire buckets
+            amountToProcess = totalBucket;
+        }
+
+        // reduce stored buckets
+        if (liqTokens > _tokensForLiquidity) liqTokens = _tokensForLiquidity;
+        _tokensForLiquidity -= liqTokens;
+
+        if (treTokens > _tokensForTreasury) treTokens = _tokensForTreasury;
+        _tokensForTreasury -= treTokens;
+
+        // Liquidity: split token side half/half
+        uint256 tokensForLiquidityHalf = liqTokens / 2;
+        uint256 tokensToSwapForETH = (liqTokens - tokensForLiquidityHalf) + treTokens;
+
+        // Approve router
+        _approveInternal(address(this), router, tokensForLiquidityHalf + tokensToSwapForETH);
+
+        uint256 ethBefore = address(this).balance;
+
+        // Swap tokensToSwapForETH for ETH, best-effort minOut
+        uint256 minOut = _computeMinOut(tokensToSwapForETH);
+        _swapTokensForETH(tokensToSwapForETH, minOut);
+
+        uint256 ethGained = address(this).balance - ethBefore;
+        if (ethGained == 0) return;
+
+        // split ETH: portion for treasury vs liquidity based on token swap origin
+        // token swap is (liqHalfSwap + treasuryTokens)
+        uint256 liqSwapPart = (liqTokens - tokensForLiquidityHalf);
+        uint256 denom = liqSwapPart + treTokens;
+        if (denom == 0) return;
+
+        uint256 ethForTreasury = (ethGained * treTokens) / denom;
+        uint256 ethForLiquidity = ethGained - ethForTreasury;
+
+        // Add liquidity (mins set to 0 to avoid DoS; price impact already controlled by caps)
+        if (tokensForLiquidityHalf > 0 && ethForLiquidity > 0) {
+            _addLiquidity(tokensForLiquidityHalf, ethForLiquidity);
+        }
+
+        // Treasury payout
+        if (ethForTreasury > 0) {
+            (bool ok, ) = treasury.call{value: ethForTreasury}("");
+            require(ok, "TREASURY_SEND_FAIL");
+        }
+    }
+
+    function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
+        // Best-effort: if router.getAmountsOut is available, apply slippage bps
+        address;
+        path[0] = address(this);
+        path[1] = weth;
+
+        try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
+            if (amounts.length >= 2 && amounts[1] > 0) {
+                uint256 quoted = amounts[1];
+                uint256 minOut = (quoted * (BPS_DENOM - slippageBps)) / BPS_DENOM;
+                return minOut;
+            }
+        } catch {
+            // fallback
+        }
+        return 0;
+    }
+
+    function _swapTokensForETH(uint256 tokenAmount, uint256 amountOutMin) internal {
+        address;
+        path[0] = address(this);
+        path[1] = weth;
+
+        IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
+            tokenAmount,
+            amountOutMin,
+            path,
+            address(this),
+            block.timestamp
+        );
+    }
+
+    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
+        IDexV2Router(router).addLiquidityETH{value: ethAmount}(
+            address(this),
+            tokenAmount,
+            0,
+            0,
+            owner,
+            block.timestamp
+        );
+    }
+
     function _approveInternal(address owner_, address spender, uint256 amount) internal {
         _allowances[owner_][spender] = amount;
         emit Approval(owner_, spender, amount);
     }
-
-    receive() external payable {}
 }
-```2
