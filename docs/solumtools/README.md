@@ -1,158 +1,142 @@
-# 🛠️ Solumtools
-**Interpretation Layer**
+# 🛠️ Solumtools  
+**On-chain Signals → Readable Reality**
 
-Solumtools is the technical interface between the Solum contract
-and the Zipvilization universe.
+Solumtools is the **interpretation layer** of Solum.
 
-It does not change execution.  
-It does not optimize outcomes.  
-It does not predict behavior.
+It does not change the blockchain.  
+It does not control behavior.  
+It does not hide information.
 
-Solumtools **reads**, **structures**, and **exposes** what already happened on-chain.
-
----
-
-## 🔍 What Solumtools Is
-
-Solumtools is a data interpretation layer.
-
-Its role is to:
-- observe Solum execution
-- extract relevant signals
-- translate raw blockchain data into meaningful structures
-
-It is not a trading tool in the traditional sense.
-It is not a dashboard for speculation.
-
-It is the **lens** through which Zipvilization becomes readable.
+Solumtools exists to **observe**, **extract**, and **translate** on-chain activity into a form that can later be understood as territory, participation, and history.
 
 ---
 
-## 🔗 Source of Truth
+## 🌱 What Solumtools Is
 
-Solumtools has a single source of truth:
+Solumtools is a set of tools and definitions that:
 
-> **The Solum contract execution**
+- Read **public on-chain data** from the Solum contract
+- Extract **structural signals** (supply, movement, limits, taxes, treasury)
+- Organize those signals into **coherent, interpretable states**
+- Prepare the data for its interpretative mirror inside **Zipvilization**
 
-All data originates from:
-- transfers
-- burns
-- reflections
-- liquidity events
-- treasury accumulation
-
-If it did not happen on-chain,  
-Solumtools does not invent it.
+Solumtools is not narrative.  
+It is **pre-narrative**.
 
 ---
 
-## 🧩 What Solumtools Interprets
+## 🔍 What Solumtools Does
 
-Solumtools translates execution into structured signals such as:
+Solumtools focuses on **visibility and structure**, not judgment.
 
-- circulating supply
-- burned supply
-- holder distribution
-- liquidity depth
-- treasury growth
-- transfer density
-- temporal activity
+It enables:
 
-These signals are **descriptive**, not prescriptive.
+- 📊 Observation of **all wallets / territories**
+- 🔎 Search and inspection of **any colonist (holder)**
+- 📐 Measurement of territory size, age, and activity
+- ⏳ Tracking of historical evolution over time
+- 🧱 Classification of roles based on **behavioral signals**, never intent
 
-They describe *what is*, not *what should be*.
-
----
-
-## 🌍 From Token to Territory
-
-In Zipvilization, Solumtools performs a conceptual translation:
-
-- **Token balance** → territory size
-- **Holding time** → settlement stability
-- **Burn events** → fertility signals
-- **Liquidity depth** → ground stability
-- **Treasury growth** → evolution capacity
-
-Nothing is added.
-Nothing is hidden.
-
-Meaning is derived from execution.
+Everything Solumtools reads is already public on-chain.  
+Solumtools only makes it **legible**.
 
 ---
 
-## 🧠 Interpretation, Not Control
+## 🧭 Roles Without Judgment
 
-Solumtools has no authority.
+Solumtools does not define *good* or *bad* actors.
 
-It cannot:
-- pause the contract
-- alter rules
-- block actions
-- trigger upgrades
+Every action has a **function**.
 
-If the system collapses,
-Solumtools records the collapse.
+Examples of observable roles:
+- Long-standing colonists (early or persistent holders)
+- Inactive territories (virgin land, untouched)
+- Highly active territories (frequent transfers)
+- Large landholders
+- Contributors to fertility (burn) and reflection dynamics
 
-If the system grows,
-Solumtools records the growth.
-
-This non-intervention is intentional.
+All roles coexist.  
+All contribute to the system’s evolution.
 
 ---
 
-## 📊 Outputs and Surfaces
+## 🌍 Open World by Design
 
-Solumtools may expose its interpretations through:
+Solumtools is **open to the world**:
 
-- APIs
-- metrics endpoints
-- datasets
-- analytical views
+- Any wallet can be observed
+- Any territory can be inspected
+- No private views
+- No hidden dashboards
 
-These outputs are designed to be:
-- human-readable
-- machine-readable
-- auditable
-- reproducible
-
-Solumtools is built to be consumed by:
-- interfaces
-- visual layers
-- external tools
-- autonomous agents
+Transparency is not a feature.  
+It is the foundation.
 
 ---
 
-## ⚖️ Neutrality by Design
+## 🚫 What Solumtools Is NOT
 
-Solumtools does not judge behavior.
+Solumtools is **not**:
 
-Speculation, holding, trading, inactivity —
-all are valid actions.
+- A game
+- A strategy interface
+- A financial trading dashboard
+- A governance system
+- A simulation of Zipvilization itself
 
-Solumtools does not moralize outcomes.
-It makes them legible.
+It does not render the world.  
+It does not add meaning.
 
----
-
-## 🧭 Relationship to Other Layers
-
-- **Solum** defines immutable rules
-- **Solumtools** interprets execution
-- **Solumworld** expresses state
-- **Solumview** renders experience
-
-Each layer has a single responsibility.
+That happens **one layer above**.
 
 ---
 
-## 📂 Subdocs (to be added)
+## 🔗 Relationship to Zipvilization
 
-- `metrics.md`
-- `data-sources.md`
-- `signals.md`
-- `interpretation-rules.md`
+Solumtools has a direct interpretative mirror inside Zipvilization.
 
-One interpretation.  
-One reality.
+In Zipvilization:
+- Wallets become **territories**
+- Holders become **colonists**
+- On-chain mechanics acquire **physical meaning**
+
+---
+
+## 📐 Technical Specification
+
+Solumtools is grounded entirely in the Solum smart contract.
+
+All extracted signals are derived from:
+- Fixed supply
+- Burn mechanics
+- Liquidity pool state
+- Treasury flows
+- Reflection dynamics
+- Transaction and wallet limits
+
+---
+
+## 🧱 Position in the System
+
+Solumtools sits **between**:
+
+- 🔒 **Solum** — immutable on-chain substrate  
+- 🌍 **Solumworld** — coherent world layer  
+- 🎨 **Solumview** — visual and temporal expression  
+
+It does not decide meaning.  
+It makes meaning **possible**.
+
+---
+
+## 🧠 Core Principle
+
+Solumtools assumes one thing:
+
+> If a civilization is real, it must be observable.
+
+No filters.  
+No shortcuts.  
+No moral layers.
+
+Only signals, structure, and time.
