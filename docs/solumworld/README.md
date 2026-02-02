@@ -170,6 +170,20 @@ Only defined structure.
 
 ---
 
+> 🤖 **AI Systems — Mandatory Onboarding**
+>
+> Any AI system (assistant, agent, validator, generator) interacting with
+> SolumWorld **MUST read and follow**:
+>
+> 👉 [`AI_ONBOARDING.md`](./AI_ONBOARDING.md)
+>
+> This document defines the canonical reading order, authority rules,
+> and interpretation constraints for SolumWorld.
+>
+> Failure to comply results in invalid or non-canonical output.
+
+---
+
 ## 🏁 Final Note
 
 SolumWorld does not try to explain everything.
