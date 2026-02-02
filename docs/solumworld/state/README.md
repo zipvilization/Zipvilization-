@@ -1,123 +1,151 @@
-# SolumWorld — State Canon
+# 🧩 SolumWorld State — Canonical Subsystem
 
-## Purpose
+This folder defines the **canonical state** of SolumWorld.
 
-This document defines the **canonical state system** of SolumWorld.
+Everything in `state/` is **normative**.
 
-State is the ultimate source of truth.
-If something is not representable, derivable, or valid under this state system,
-it does not exist in SolumWorld — regardless of visuals, simulations, or narratives.
-
-This module is **implementation-agnostic** and **engine-independent**.
+If a condition, transition or rule is not valid under this folder,
+it is invalid everywhere else in SolumWorld.
 
 ---
 
-## What “State” Means in SolumWorld
+## 🔒 Authority Scope
 
-State is the complete, minimal, and auditable description of:
+`state/` is the **highest authority layer below** `SolumWorld/README.md`.
 
-- what exists
-- where it exists
-- in which condition it exists
-- how it may change
-- what must never change
+It defines:
+- what states are valid
+- what states are impossible
+- how states may change
+- what must always remain true
 
-State is **not**:
-- a rendering
-- a UI
-- a gameplay mechanic
-- an optimization
-- a convenience abstraction
-
-State **precedes** all of those.
+No other folder may override `state`.
 
 ---
 
-## Authority Model
+## 🧠 What “State” Means
 
-The state system has **absolute authority**.
+In SolumWorld, **state** is:
 
-Any layer consuming state (engine, AI, simulation, visualization, tooling)
-must adapt to state — never the other way around.
+- the complete description of the world at a given moment
+- independent of representation (zoom)
+- independent of time narration (evolution)
+- independent of storage or snapshots (data)
 
-No external system may:
-- bypass state rules
-- mutate state without validation
-- invent state outside this model
-
----
-
-## Canonical Guarantees
-
-The state system guarantees:
-
-- determinism at the state level
-- auditability across time
-- replayability of world evolution
-- rollback capability without ambiguity
-- invariants that cannot be violated
-
-If a future implementation cannot satisfy these guarantees,
-it is considered invalid.
+State is truth.
+Everything else is projection.
 
 ---
 
-## Module Structure
+## 📂 Files and Responsibilities
 
-This folder defines the complete state model through the following documents:
+### 1️⃣ `STATE_INVARIANTS.md`
 
-- **STATE_INVARIANTS**  
-  Rules that must always hold true. They define the identity of the world.
+Defines **absolute rules**.
 
-- **STATE_TRANSITIONS**  
-  The only allowed ways state may change.
+- Must always hold
+- Cannot be violated
+- Cannot be bypassed by evolution or zoom
+- Cannot be retroactively changed
 
-- **STATE_VALIDATION**  
-  How state correctness is checked and enforced.
-
-- **STATE_HISTORY**  
-  How past states are recorded, referenced, and replayed.
-
-- **STATE_ROLLBACK**  
-  Conditions and mechanisms for reverting state safely.
-
-Each document addresses a single responsibility.
-Together they form a closed, coherent system.
+If an invariant is broken, the state is invalid.
 
 ---
 
-## Relationship to Time and Evolution
+### 2️⃣ `STATE_TRANSITIONS.md`
 
-State is not static.
+Defines **allowed state changes**.
 
-Evolution in SolumWorld is expressed as:
-- a sequence of validated state transitions
-- preserving invariants
-- producing an auditable history
+- What transitions are possible
+- Preconditions and postconditions
+- Directionality constraints
 
-There is no concept of “current” without history.
-There is no concept of “future” without valid transitions.
+Anything not listed here is not a valid transition.
 
 ---
 
-## Relationship to Other Modules
+### 3️⃣ `STATE_VALIDATION.md`
 
-- **Zoom levels** interpret state at different resolutions.
-- **Evolution rules** operate strictly through state transitions.
-- **AI systems** observe and propose changes, but do not own state.
-- **Visual layers** are projections, not authorities.
+Defines **how validity is checked**.
 
-State is upstream of all of them.
+- Validation logic
+- Acceptance criteria
+- Failure conditions
+
+Used by both humans and AI to decide if a state is admissible.
 
 ---
 
-## Final Rule
+### 4️⃣ `STATE_HISTORY.md`
 
-If there is ever a conflict between:
-- documentation and implementation
-- visualization and state
-- simulation and invariants
+Defines **historical guarantees**.
 
-**State wins. Always.**
+- What past states must remain provable
+- What cannot be erased
+- What continuity must exist
 
-This document is the reference point for all such conflicts.
+History is not optional in SolumWorld.
+
+---
+
+### 5️⃣ `STATE_ROLLBACK.md`
+
+Defines **rollback limits**.
+
+- What may be reverted
+- What may never be reverted
+- Under which constraints rollback is legal
+
+Rollback never bypasses invariants.
+
+---
+
+## ⚖️ Internal Precedence Rules
+
+Within `state/`, precedence is:
+
+1. `STATE_INVARIANTS.md`
+2. `STATE_TRANSITIONS.md`
+3. `STATE_VALIDATION.md`
+4. `STATE_HISTORY.md`
+5. `STATE_ROLLBACK.md`
+
+Lower files must never contradict higher ones.
+
+---
+
+## 🔗 Relation to Other Layers
+
+- **zoom/**  
+  Reads state. Never modifies it.
+
+- **evolution/**  
+  Applies transitions defined in state.
+
+- **data/**  
+  Records state snapshots. Never defines validity.
+
+State is upstream of all other layers.
+
+---
+
+## 🤖 AI Interpretation Rules
+
+Any AI interacting with SolumWorld state must:
+
+1. Treat invariants as absolute.
+2. Reject undefined transitions.
+3. Validate before accepting any change.
+4. Never infer missing rules.
+
+If a rule is not written here, it does not exist.
+
+---
+
+## 🏁 Summary
+
+This folder defines **what SolumWorld is allowed to be**.
+
+Nothing outside `state/` can change that.
+
+State is the law.
