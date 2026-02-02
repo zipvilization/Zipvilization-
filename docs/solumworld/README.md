@@ -1,133 +1,179 @@
-# 🌍 SolumWorld
-### Civilizational Interpretation Layer
+# 🌍 SolumWorld — Technical Canon
 
-SolumWorld is the **civilizational interpretation layer** built on top of Solum.
+SolumWorld defines the **canonical world model** used by the Zipvilization ecosystem.
 
-It explores how persistent on-chain state, when observed over time,  
-can be interpreted as structures resembling settlement, growth,  
-organization, and collapse.
+This document is not descriptive.
+It is **normative**.
 
-> SolumWorld interprets.  
-> It does not simulate.  
-> It does not intervene.
+If a rule, state or transition is not defined here or in the documents explicitly declared as authoritative by this canon, **it does not exist in SolumWorld**.
 
 ---
 
-## 🧠 What SolumWorld Is
+## 🔒 Canon Status
 
-SolumWorld is:
+This README is the **highest authority document** for SolumWorld.
 
-- a conceptual layer derived from Solum state  
-- an interpretive framework for long-term patterns  
-- a non-interactive reading of persistence  
-- a bridge between raw execution and systemic meaning  
+It defines:
+- structure
+- hierarchy
+- authority
+- conflict resolution
+- reading and interpretation rules
 
-SolumWorld **observes structure**.  
-It does not generate it.
-
----
-
-## 🚫 What SolumWorld Is Not
-
-SolumWorld is **not**:
-
-- a game world  
-- a metaverse  
-- a simulation with actors or decisions  
-- a governance system  
-- a promise of future functionality  
-
-Any interpretation that treats SolumWorld as interactive or playable  
-is incorrect.
+All other documents inside `SolumWorld/` derive their meaning from this file.
 
 ---
 
-## 🔗 Relationship to Other Blocks
+## 🧭 Authority Hierarchy
 
-SolumWorld exists **after** Solumtools.
+The SolumWorld documentation follows a strict authority order.
 
-- **Solum** → defines persistence and erosion  
-- **Solumtools** → structures observable signals  
-- **SolumWorld** → interprets resulting patterns  
+From highest to lowest:
 
-SolumWorld reads what is already true.  
-It does not add new truth.
+1. **`SolumWorld/README.md`**  
+   → Canon definition and authority rules.
 
----
+2. **`state/`**  
+   → Canonical world state.  
+   Defines what is valid, invariant, reachable and reversible.
 
-## 🔍 Zoom Levels
-### Zoom as Temporal Orientation
+3. **`zoom/` / `zoomrules/`**  
+   → Representation rules.  
+   Zoom levels **project** state but never create or modify it.
 
-Zoom is **not proximity**.  
-Zoom is a change in **temporal interpretation density**.
+4. **`evolution/`**  
+   → Temporal progression of the world.  
+   Describes how state changes over time **without violating invariants**.
 
-Zoom does not move closer to territory.  
-It moves closer to **accumulated history**.
-
-> Zoom is always centripetal,  
-> oriented toward the temporal origin of the system.
-
----
-
-### 🔹 Zoom 0 — Global State
-
-- fully aggregated system state  
-- no historical detail  
-- statistical distribution only  
+5. **`data/`**  
+   → Data, snapshots, formats and records.  
+   Data is **non-normative** unless validated by `state`.
 
 ---
 
-### 🔹 Zoom 1 — Regional Distribution
+## 📂 Folder Responsibilities
 
-- regional patterns emerge  
-- relative age becomes visible  
-- no ownership detail  
+### 🧩 `state/` — Canonical World State
 
----
+The `state/` folder defines **what SolumWorld is allowed to be**.
 
-### 🔹 Zoom 2 — Density Patterns
+It contains:
+- invariants (what must always hold)
+- validation rules
+- state transitions
+- rollback constraints
+- historical guarantees
 
-- clusters and corridors  
-- persistence vs volatility  
-- structural tendencies appear  
-
----
-
-### 🔹 Zoom 3 — Historical Accumulation
-
-- long-lived regions  
-- stable vs unstable zones  
-- history becomes legible  
+If something violates `state`, it is invalid even if represented elsewhere.
 
 ---
 
-## ⚖️ Non-Intervention Rule
+### 🔍 `zoom/` and `zoomrules/` — Representation Layer
 
-SolumWorld has **no authority**.
+Zoom documents define **how the world is viewed at different scales**.
 
-It does not:
-- control Solum  
-- alter execution  
-- recommend actions  
-- optimize outcomes  
+Rules:
+- zoom never creates state
+- zoom never mutates state
+- zoom never bypasses invariants
+- zoom is always derived from `state`
 
-It exposes structure.  
-Nothing more.
+Zoom is projection, not authority.
 
 ---
 
-## 🧭 Scope
+### ⏳ `evolution/` — Temporal Progression
 
-SolumWorld explains:
+Evolution defines **how SolumWorld changes over time**.
 
-- how to read patterns  
-- how scale alters meaning  
-- how persistence shapes structure  
+Rules:
+- evolution cannot break invariants
+- evolution must be expressible as valid state transitions
+- evolution is directional but not necessarily linear
 
-It does **not** define:
+Evolution explains *when* and *why* changes occur, not *whether* they are valid.
 
-- interfaces  
-- narratives  
-- economic promises  
+---
 
-Those belong to other layers.
+### 📊 `data/` — Records and Snapshots
+
+Data represents:
+- snapshots
+- derived datasets
+- formats
+- externalized representations
+
+Rules:
+- data has no authority on its own
+- data must be validated against `state`
+- invalid data does not become valid by repetition
+
+---
+
+## ⚖️ Conflict Resolution Rules
+
+If contradictions arise:
+
+- `README.md` overrides everything
+- `state/` overrides `evolution`, `zoom` and `data`
+- `zoom` cannot override `state`
+- `data` is never authoritative without state validation
+
+If a rule is not explicitly defined, it is **not assumed**.
+
+---
+
+## 🔗 System Integration
+
+SolumWorld operates within a larger system:
+
+- **Solum**  
+  Defines economic units, limits and on-chain constraints.
+
+- **SolumWorld**  
+  Defines the canonical world, its state and evolution.
+
+- **Zipvilization**  
+  Simulates, visualizes and interacts with SolumWorld  
+  but does not define its truth.
+
+SolumWorld is the **source of world truth**.
+
+---
+
+## 🤖 AI Interpretation Contract
+
+Any AI system interacting with SolumWorld must:
+
+1. Treat this README as the root authority.
+2. Validate all changes against `state`.
+3. Never infer rules not explicitly defined.
+4. Never elevate representation or data above state.
+
+Failure to follow these rules results in invalid interpretation.
+
+---
+
+## 🧱 Design Principle
+
+SolumWorld is designed to be:
+- deterministic
+- interpretable
+- evolvable
+- auditable
+
+Nothing implicit.
+Nothing assumed.
+Nothing magical.
+
+Only defined structure.
+
+---
+
+## 🏁 Final Note
+
+SolumWorld does not try to explain everything.
+
+It defines **what is allowed to exist**.
+
+Everything else is interpretation.
