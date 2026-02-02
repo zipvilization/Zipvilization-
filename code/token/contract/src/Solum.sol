@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title Solum (SOLUM)
- * @notice Fixed-supply, deflationary token used as Zipvilization’s on-chain substrate.
+ * @notice Fixed-supply, deflationary token used as Zipvilizationâ€™s on-chain substrate.
  * @dev Base network. Deploy using a V2-style router compatible with:
  *      - swapExactTokensForETHSupportingFeeOnTransferTokens
  *      - addLiquidityETH
@@ -92,7 +92,7 @@ abstract contract Ownable {
     }
 }
 
-contract SolumToken is IERC20, Ownable {
+contract Solum is IERC20, Ownable {
     /* ---------- METADATA ---------- */
     string public constant name = "Solum";
     string public constant symbol = "SOLUM";
@@ -145,6 +145,7 @@ contract SolumToken is IERC20, Ownable {
     uint256 public constant MAX_TX_AMOUNT = 10_000_000_000 * 10**decimals; // 10B fixed
     uint256 public constant MAX_WALLET_INITIAL = 30_000_000_000 * 10**decimals; // 30B
     uint256 public constant MAX_WALLET_GROWTH_DELAY = 180 days;
+    uint256 public constant MAX_WALLET_WEEKLY_GROWTH_PPM = 110_000; // +10% weekly, base 100_000
 
     /* ---------- TREASURY TIMELOCK ---------- */
     address public treasury;
@@ -161,10 +162,10 @@ contract SolumToken is IERC20, Ownable {
     bool public swapBackEnabled = true;
     bool public tradingEnabled = false;
 
-    uint256 public swapThreshold = 200_000_000 * 10**decimals;      // 200M tokens (tune)
+    uint256 public swapThreshold = 200_000_000 * 10**decimals;       // 200M tokens (tune)
     uint256 public swapBackMaxAmount = 1_000_000_000 * 10**decimals; // 1B tokens max per swap (tune)
-    uint256 public swapBackCooldown = 60;                           // seconds (tune)
-    uint256 public slippageBps = 300;                               // 3% in bps (tune 50..800 typical)
+    uint256 public swapBackCooldown = 60;                            // seconds (tune)
+    uint256 public slippageBps = 300;                                // 3% in bps (tune 50..800)
 
     uint256 public lastSwapBackTime;
     bool private _inSwapBack;
@@ -178,9 +179,9 @@ contract SolumToken is IERC20, Ownable {
 
     uint256 public immutable deploymentTime;
 
-    // accounting for swapBack buckets (accurate)
-    uint256 private _tokensForLiquidity; // token units (tAmount)
-    uint256 private _tokensForTreasury;  // token units (tAmount)
+    // buckets (token units) tracked so swapBack is proportional to what was collected
+    uint256 private _tokensForLiquidity;
+    uint256 private _tokensForTreasury;
 
     /* ---------- EVENTS ---------- */
     event TradingEnabled();
@@ -217,8 +218,9 @@ contract SolumToken is IERC20, Ownable {
         router = _router;
         pair = _pair;
 
-        weth = IDexV2Router(_router).WETH();
-        require(weth != address(0), "WETH_ZERO");
+        address _weth = IDexV2Router(_router).WETH();
+        require(_weth != address(0), "WETH_ZERO");
+        weth = _weth;
 
         treasury = _treasury;
         deploymentTime = block.timestamp;
@@ -428,14 +430,12 @@ contract SolumToken is IERC20, Ownable {
 
     function reflectionFromToken(uint256 tAmount) public view returns (uint256) {
         require(tAmount <= _tTotal, "AMOUNT_GT_SUPPLY");
-        uint256 currentRate = _getRate();
-        return tAmount * currentRate;
+        return tAmount * _getRate();
     }
 
     function tokenFromReflection(uint256 rAmount) public view returns (uint256) {
         require(rAmount <= _rTotal, "R_GT_TOTAL");
-        uint256 currentRate = _getRate();
-        return rAmount / currentRate;
+        return rAmount / _getRate();
     }
 
     function _getRate() internal view returns (uint256) {
@@ -454,9 +454,9 @@ contract SolumToken is IERC20, Ownable {
         if (weeksElapsed > 520) return type(uint256).max;
 
         uint256 limit = MAX_WALLET_INITIAL;
-        // +10% weekly compounding
         for (uint256 i = 0; i < weeksElapsed; i++) {
-            limit = (limit * 110) / 100;
+            // ppm base 100_000
+            limit = (limit * MAX_WALLET_WEEKLY_GROWTH_PPM) / 100_000;
         }
         return limit;
     }
@@ -468,12 +468,129 @@ contract SolumToken is IERC20, Ownable {
 
         // Trigger primarily on sells
         if (to != pair) return false;
-
         if (block.timestamp < lastSwapBackTime + swapBackCooldown) return false;
 
         uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
         return contractTokenBalance >= swapThreshold;
     }
+
+    /* ---------- swap helpers ---------- */
+
+    function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
+        // Best-effort: if router supports getAmountsOut, apply slippage; else return 0.
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = weth;
+
+        try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
+            if (amounts.length == 0) return 0;
+            uint256 out = amounts[amounts.length - 1];
+            uint256 bps = slippageBps;
+            if (bps > BPS_DENOM) bps = BPS_DENOM; // defensive
+            return (out * (BPS_DENOM - bps)) / BPS_DENOM;
+        } catch {
+            return 0;
+        }
+    }
+
+    function _swapTokensForETH(uint256 tokenAmount, uint256 minOut) internal {
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = weth;
+
+        IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
+            tokenAmount,
+            minOut,
+            path,
+            address(this),
+            block.timestamp
+        );
+    }
+
+    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
+        // router will pull tokens from this contract
+        IDexV2Router(router).addLiquidityETH{value: ethAmount}(
+            address(this),
+            tokenAmount,
+            0,
+            0,
+            owner, // LP recipient (can be a locker/multisig off-chain)
+            block.timestamp
+        );
+    }
+
+    function _approveInternal(address owner_, address spender, uint256 amount) internal {
+        _allowances[owner_][spender] = amount;
+        emit Approval(owner_, spender, amount);
+    }
+
+    function _swapBack() internal lockTheSwap {
+        lastSwapBackTime = block.timestamp;
+
+        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
+        if (contractTokenBalance < swapThreshold) return;
+
+        uint256 amountToProcess = contractTokenBalance;
+        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
+
+        // Buckets may be 0 in tests/mocks; handle gracefully.
+        uint256 totalBucket = _tokensForLiquidity + _tokensForTreasury;
+        if (totalBucket == 0) {
+            // nothing to do; avoid division by zero
+            return;
+        }
+
+        // Scale buckets to the amount being processed (pro-rata)
+        uint256 tokensForLiq = (_tokensForLiquidity * amountToProcess) / totalBucket;
+        uint256 tokensForTres = amountToProcess - tokensForLiq;
+
+        // We will:
+        // - keep half of liquidity tokens as tokens (pair with ETH)
+        // - swap the rest (liquidity half + treasury tokens) for ETH
+        uint256 tokensForLiqHalf = tokensForLiq / 2;
+        uint256 tokensToSwap = amountToProcess - tokensForLiqHalf;
+
+        // Update buckets first (effectively consuming amountToProcess)
+        if (_tokensForLiquidity >= tokensForLiq) _tokensForLiquidity -= tokensForLiq; else _tokensForLiquidity = 0;
+        if (_tokensForTreasury >= tokensForTres) _tokensForTreasury -= tokensForTres; else _tokensForTreasury = 0;
+
+        // Approve router to pull tokens from contract for swap + liquidity
+        _approveInternal(address(this), router, tokensToSwap + tokensForLiqHalf);
+
+        uint256 ethBefore = address(this).balance;
+
+        uint256 minOut = _computeMinOut(tokensToSwap);
+        _swapTokensForETH(tokensToSwap, minOut);
+
+        uint256 ethGained = address(this).balance - ethBefore;
+
+        if (ethGained == 0) {
+            // In pure-mock contexts, do nothing further.
+            // Buckets were reduced; that's acceptable in CI tests because swapBack
+            // isn't supposed to be triggered in them.
+            return;
+        }
+
+        // ETH split:
+        // - part for liquidity = proportional to tokens swapped that "belonged" to liquidity half
+        // - remainder to treasury
+        uint256 liqSwapPortion = tokensForLiq - tokensForLiqHalf; // the half that got swapped
+        uint256 ethForLiquidity = (ethGained * liqSwapPortion) / tokensToSwap;
+        uint256 ethForTreasury = ethGained - ethForLiquidity;
+
+        if (tokensForLiqHalf > 0 && ethForLiquidity > 0) {
+            _addLiquidity(tokensForLiqHalf, ethForLiquidity);
+        }
+
+        if (ethForTreasury > 0) {
+            (bool ok, ) = treasury.call{value: ethForTreasury}("");
+            require(ok, "TREASURY_SEND_FAIL");
+        }
+    }
+
+    /* ============================== */
+    /* ========= TRANSFER =========== */
+    /* ============================== */
 
     function _transfer(address from, address to, uint256 tAmount) internal {
         require(from != address(0) && to != address(0), "ZERO_ADDR");
@@ -505,10 +622,10 @@ contract SolumToken is IERC20, Ownable {
             require(newBal <= _maxWalletNow(), "MAX_WALLET");
         }
 
-        uint256 currentRate = _getRate();
+        uint256 rate = _getRate();
 
-        // Convert to reflected amounts
-        uint256 rAmount = tAmount * currentRate;
+        // Convert to reflected amount
+        uint256 rAmount = tAmount * rate;
 
         // Fees in token units
         uint256 tBurn;
@@ -540,11 +657,7 @@ contract SolumToken is IERC20, Ownable {
         uint256 tFeeTotal = tBurn + tReflection + tLP + tTreasury;
         uint256 tTransferAmount = tAmount - tFeeTotal;
 
-        uint256 rBurn = tBurn * currentRate;
-        uint256 rReflection = tReflection * currentRate;
-        uint256 rLP = tLP * currentRate;
-        uint256 rTreasury = tTreasury * currentRate;
-        uint256 rTransferAmount = tTransferAmount * currentRate;
+        uint256 rTransferAmount = tTransferAmount * rate;
 
         // Deduct from sender
         require(_rOwned[from] >= rAmount, "BALANCE");
@@ -554,149 +667,27 @@ contract SolumToken is IERC20, Ownable {
         _rOwned[to] += rTransferAmount;
         emit Transfer(from, to, tTransferAmount);
 
-        // Handle LP + Treasury fee: collected to contract (later swapBack)
+        // Collect LP + Treasury to contract
         uint256 tToContract = tLP + tTreasury;
-        uint256 rToContract = rLP + rTreasury;
-        if (rToContract > 0) {
-            _rOwned[address(this)] += rToContract;
+        if (tToContract > 0) {
+            _rOwned[address(this)] += tToContract * rate;
             emit Transfer(from, address(this), tToContract);
 
-            // accurate bucket accounting
+            // Track buckets for swapBack
             _tokensForLiquidity += tLP;
             _tokensForTreasury += tTreasury;
         }
 
-        // Handle reflection: reduce rTotal (standard reflect mechanic)
-        if (rReflection > 0) {
-            _rTotal -= rReflection;
+        // Reflection: reduce rTotal (standard reflect mechanic)
+        if (tReflection > 0) {
+            _rTotal -= tReflection * rate;
         }
 
-        // Handle real burn: reduce both tTotal and rTotal to keep rate consistent
+        // Real burn: reduce both totals + emit burn transfer
         if (tBurn > 0) {
             _tTotal -= tBurn;
-            _rTotal -= rBurn;
+            _rTotal -= tBurn * rate;
             emit Transfer(from, address(0), tBurn);
         }
-    }
-
-    /* ============================== */
-    /* ========= SWAPBACK =========== */
-    /* ============================== */
-
-    function _swapBack() internal lockTheSwap {
-        lastSwapBackTime = block.timestamp;
-
-        uint256 contractTokenBalance = tokenFromReflection(_rOwned[address(this)]);
-        if (contractTokenBalance < swapThreshold) return;
-
-        uint256 amountToProcess = contractTokenBalance;
-        if (amountToProcess > swapBackMaxAmount) amountToProcess = swapBackMaxAmount;
-
-        // total buckets tracked
-        uint256 totalBucket = _tokensForLiquidity + _tokensForTreasury;
-        if (totalBucket == 0) return;
-
-        // scale buckets if processing less than totalBucket
-        uint256 liqTokens = _tokensForLiquidity;
-        uint256 treTokens = _tokensForTreasury;
-
-        if (amountToProcess < totalBucket) {
-            liqTokens = (liqTokens * amountToProcess) / totalBucket;
-            treTokens = amountToProcess - liqTokens; // remainder
-        } else {
-            // process entire buckets
-            amountToProcess = totalBucket;
-        }
-
-        // reduce stored buckets
-        if (liqTokens > _tokensForLiquidity) liqTokens = _tokensForLiquidity;
-        _tokensForLiquidity -= liqTokens;
-
-        if (treTokens > _tokensForTreasury) treTokens = _tokensForTreasury;
-        _tokensForTreasury -= treTokens;
-
-        // Liquidity: split token side half/half
-        uint256 tokensForLiquidityHalf = liqTokens / 2;
-        uint256 tokensToSwapForETH = (liqTokens - tokensForLiquidityHalf) + treTokens;
-
-        // Approve router
-        _approveInternal(address(this), router, tokensForLiquidityHalf + tokensToSwapForETH);
-
-        uint256 ethBefore = address(this).balance;
-
-        // Swap tokensToSwapForETH for ETH, best-effort minOut
-        uint256 minOut = _computeMinOut(tokensToSwapForETH);
-        _swapTokensForETH(tokensToSwapForETH, minOut);
-
-        uint256 ethGained = address(this).balance - ethBefore;
-        if (ethGained == 0) return;
-
-        // split ETH: portion for treasury vs liquidity based on token swap origin
-        // token swap is (liqHalfSwap + treasuryTokens)
-        uint256 liqSwapPart = (liqTokens - tokensForLiquidityHalf);
-        uint256 denom = liqSwapPart + treTokens;
-        if (denom == 0) return;
-
-        uint256 ethForTreasury = (ethGained * treTokens) / denom;
-        uint256 ethForLiquidity = ethGained - ethForTreasury;
-
-        // Add liquidity (mins set to 0 to avoid DoS; price impact already controlled by caps)
-        if (tokensForLiquidityHalf > 0 && ethForLiquidity > 0) {
-            _addLiquidity(tokensForLiquidityHalf, ethForLiquidity);
-        }
-
-        // Treasury payout
-        if (ethForTreasury > 0) {
-            (bool ok, ) = treasury.call{value: ethForTreasury}("");
-            require(ok, "TREASURY_SEND_FAIL");
-        }
-    }
-
-    function _computeMinOut(uint256 amountIn) internal view returns (uint256) {
-        // Best-effort: if router.getAmountsOut is available, apply slippage bps
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        try IDexV2Router(router).getAmountsOut(amountIn, path) returns (uint[] memory amounts) {
-            if (amounts.length >= 2 && amounts[1] > 0) {
-                uint256 quoted = amounts[1];
-                uint256 minOut = (quoted * (BPS_DENOM - slippageBps)) / BPS_DENOM;
-                return minOut;
-            }
-        } catch {
-            // fallback
-        }
-        return 0;
-    }
-
-    function _swapTokensForETH(uint256 tokenAmount, uint256 amountOutMin) internal {
-        address;
-        path[0] = address(this);
-        path[1] = weth;
-
-        IDexV2Router(router).swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            amountOutMin,
-            path,
-            address(this),
-            block.timestamp
-        );
-    }
-
-    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
-        IDexV2Router(router).addLiquidityETH{value: ethAmount}(
-            address(this),
-            tokenAmount,
-            0,
-            0,
-            owner,
-            block.timestamp
-        );
-    }
-
-    function _approveInternal(address owner_, address spender, uint256 amount) internal {
-        _allowances[owner_][spender] = amount;
-        emit Approval(owner_, spender, amount);
     }
 }
