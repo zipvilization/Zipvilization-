@@ -1,228 +1,147 @@
-# 🔒 Solum
-**Immutable Substrate**
+# 🔒 Solum — Immutable Substrate
 
-Solum is the on-chain foundation of Zipvilization.
+Solum is the **on-chain substrate** of Zipvilization.
 
-It is a fixed-rule token contract that defines how value moves, disappears,
-redistributes, and accumulates — without governance, without upgrades, and without
-discretionary control.
+It is not a governance token.
+It is not an experimental mechanic.
+It is not a promise of yield.
 
-Once deployed, Solum does not change.  
-Everything else grows **around it**.
+Solum defines **what is possible and what is not** inside the system.
+
+If a rule is not present in the contract, it does not exist.
 
 ---
 
 ## 🧱 What Solum Is
 
-At the technical level, Solum is:
+At the contract level, **Solum is an ERC-20 token** with fixed supply and immutable rules.
 
-- fixed supply (no mint, no inflation)
-- immutable transfer logic (rules are coded, not managed)
-- execution equality for every participant
+At the Zipvilization level, **Solum represents territory**:
 
-There is:
-- no voting system
-- no upgrade hooks
-- no “admin tuning” after deployment
+- **1 Solum = 1 square meter of land**
+- Total world size: **100 trillion m² (100T Solum)**
+- No minting. No inflation. No expansion.
 
-> If a rule is not present in the contract, it does not exist operationally.
-
-This rigidity is intentional.
+Solum is the **soil** upon which the civilization emerges.
 
 ---
 
 ## 🛡️ What Solum Protects
 
-Solum protects the experiment by enforcing:
+Solum is designed to protect the system during its most fragile phases.
 
-- **Rule Equality**  
-  everyone operates under the same constraints
+### 1. Fair Access
 
-- **Temporal Coherence**  
-  rules do not change as conditions evolve
+- **Max Transaction (MAX_TX)**  
+  Prevents instant dominance via single large movements.
 
-- **Data Integrity**  
-  on-chain execution is final and observable
+- **Max Wallet (dynamic)**  
+  Starts constrained and grows over time, allowing:
+  - early protection
+  - long-term expansion
 
-- **Resistance to Intervention**  
-  no actor can rewrite the substrate once deployed
-
-This protection is not about price.  
-It is about **trust in the substrate**.
+These limits are not permanent walls — they are **temporal safeguards**.
 
 ---
 
-## 🔄 Taxes (Structure + Incentives)
+### 2. Structural Friction (Taxes)
 
-Solum includes transfer taxes by design.
+Solum applies immutable taxes depending on transaction type:
 
-Taxes are:
-- structural mechanisms
-- explicit incentives
+- **Buy**
+- **Sell**
+- **Transfer**
 
-They introduce friction **and** direction.
+These taxes are not arbitrary.
 
-Depending on the action, taxes can:
-- 🔥 reduce total supply (burn)
-- ♻️ redistribute value to holders (reflection)
-- 🌊 reinforce liquidity
-- 🏛️ fund the treasury
+They introduce **friction**, which is essential for:
+- discouraging extractive behavior
+- slowing destructive velocity
+- funding long-term development
 
-Taxes do not promise outcomes.  
-They create the conditions for participation to matter.
+At the contract level, taxes route value into:
+- burn
+- liquidity
+- reflection
+- treasury
 
----
-
-## 🗺️ Taxes as World-Shaping Forces
-
-In Zipvilization, taxes are not only economic mechanisms.
-
-They are **world-shaping forces**.
-
-Each tax leaves a trace.  
-Each action slightly reshapes the territory.
+Their *meaning* inside Zipvilization is described separately.
 
 ---
 
-### 🔥 Burn → Fertility
+### 3. Supply Integrity
 
-Burn permanently removes Solum from existence.
+- **Fixed total supply**
+- **Real burn** (supply is permanently reduced)
+- No administrative minting
+- No emergency inflation
 
-In Zipvilization, burn is interpreted as **fertility**:
-- scarcity that gives meaning to territory
-- irreversible transformation of the land
-- value created by disappearance, not accumulation
-
-Burn is not “lost value”.  
-It is **irreversible transformation**.
+Solum’s scarcity is not narrative — it is enforced.
 
 ---
 
-### ♻️ Reflection → Balance
+### 4. Launch Discipline
 
-Reflection redistributes value passively to holders.
+Before trading is enabled:
 
-In Zipvilization, reflection is interpreted as **balance**:
-- long-term colonists gain weight over time
-- stability emerges from patience
-- consolidation happens without direct transfers
+- Only explicitly exempt addresses can move tokens
+- No silent accumulation
+- No pre-launch chaos
 
-Reflection rewards **presence**, not activity.
-
----
-
-### 🌊 Liquidity → Ground Stability
-
-Liquidity reinforcement supports the pool.
-
-In Zipvilization, liquidity is interpreted as **ground stability**:
-- the ability for territory to change hands
-- resistance to sudden collapses
-- continuity of movement (and therefore history)
-
-Without liquidity, movement becomes fragile.  
-Without movement, history becomes thin.
+The moment trading is enabled marks **Day 0** of the system.
 
 ---
 
-### 🏛️ Treasury → Evolution Capacity
+## 🔧 Technical Specification
 
-Treasury accumulation funds development.
+Solum’s full technical behavior is defined here:
 
-In Zipvilization, the treasury represents **evolution capacity**.
+➡️ **Contract Specification**  
+`docs/solum/CONTRACT_SPEC.md`
 
-It is the system’s ability to:
-- unlock new layers of interpretation
-- expand how the world is read and expressed
-- move from observation to richer forms of representation
+This document includes:
+- exact limits and constants
+- tax breakdowns
+- owner powers and constraints
+- swapback logic
+- treasury mechanics
+- edge cases and invariants
 
-Treasury does not guarantee progress.  
-It enables it.
-
-As the treasury grows, Zipvilization gains  
-the **potential to evolve without changing its foundations**.
-
----
-
-### 🧠 Interpretation, Not Simulation
-
-Zipvilization does not simulate these effects.
-
-It **interprets what already happened**:
-
-- burn becomes scarcity and fertility
-- holding becomes settlement
-- liquidity becomes stability
-- treasury becomes evolution capacity
-
-Meaning is not invented.  
-It is **read from execution**.
-
-Taxes do not tell colonists what to do.
-
-They ensure that whatever happens  
-**leaves a mark on the world**.
+If you want to audit Solum, start there.
 
 ---
 
-## ⚖️ Limits and Fair Access
+## 🌍 Solum Inside Zipvilization
 
-Solum enforces limits to protect early phases:
+Solum is not just a token.
 
-- transaction limits
-- wallet limits
-- time-based expansion of capacity
+Inside Zipvilization, the same mechanics represent:
 
-These limits:
-- reduce early dominance
-- protect low-density phases
-- allow organic distribution
+- territory
+- geography
+- time
+- evolution
+- irreversible change
 
-They are defensive mechanisms.  
-They do not guarantee fairness or profitability.
+➡️ **Solum Translation (Zipvilization Context)**  
+`docs/zipvilization/SOLUM_TRANSLATION.md`
 
----
-
-## 🚀 Launch Discipline
-
-Solum follows a strict launch discipline:
-
-- controlled pre-trading phase
-- explicit trading enablement
-- no hidden switches
-- no post-launch rule changes
-
-Execution order matters.
-
-This discipline exists to protect:
-- coherence
-- auditability
-- trust
+This document explains:
+- why burn becomes forests, rivers, and lakes
+- why transfer taxes represent relocation cost
+- why treasury growth enables evolution
+- why holders are also colonists
 
 ---
 
-## 🧭 Scope and Boundaries
+## 🧭 Final Note
 
-Solum defines **what is fixed**.
+Solum does not try to optimize outcomes.
 
-It does **not** define:
-- interfaces
-- narratives
-- economic outcomes
-- future interaction layers
+It defines **constraints**.
 
-Those emerge *around* the contract, not *inside* it.
+Everything that emerges later — tools, worlds, visuals — must operate **within these limits**, not around them.
 
----
+Solum is not flexible by design.
 
-## 📂 Subdocs (to be added)
-
-Deeper material will live here:
-
-- `contract.md`
-- `taxes.md`
-- `limits-and-fair-access.md`
-- `launch-sequence.md`
-
-One topic, one source of truth.
-```0
+It is reliable.
