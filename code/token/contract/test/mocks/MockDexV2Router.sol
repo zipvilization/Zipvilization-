@@ -1,8 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+/**
+ * @notice Minimal V2 router mock for Foundry tests.
+ * Purpose:
+ * - Provide WETH()
+ * - Provide getAmountsOut() so SolumToken can compute a best-effort minOut
+ *
+ * This mock does NOT perform real swaps or pricing.
+ * It returns a 1:1 "price" (amountOut == amountIn) for deterministic tests.
+ */
 contract MockDexV2Router {
-    address internal _weth;
+    address private _weth;
 
     constructor(address weth_) {
         _weth = weth_;
@@ -12,38 +21,21 @@ contract MockDexV2Router {
         return _weth;
     }
 
-    function getAmountsOut(uint amountIn, address[] calldata)
+    function getAmountsOut(uint amountIn, address[] calldata path)
         external
         pure
         returns (uint[] memory amounts)
     {
-        // For tests: pretend 1:1 output
-        amounts = new uint;
-        amounts[0] = amountIn;
-        amounts[1] = amountIn;
-    }
+        // Minimal sanity: in real routers, path must be >= 2.
+        // In tests we just mirror the input across the path length.
+        uint256 n = path.length;
+        if (n == 0) {
+            return new uint;
+        }
 
-    function addLiquidityETH(
-        address,
-        uint amountTokenDesired,
-        uint,
-        uint,
-        address,
-        uint
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity) {
-        // minimal stub
-        amountToken = amountTokenDesired;
-        amountETH = msg.value;
-        liquidity = 1;
-    }
-
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint,
-        uint,
-        address[] calldata,
-        address,
-        uint
-    ) external pure {
-        // no-op in tests
+        amounts = new uint[](n);
+        for (uint256 i = 0; i < n; i++) {
+            amounts[i] = amountIn;
+        }
     }
 }
