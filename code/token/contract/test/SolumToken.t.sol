@@ -7,13 +7,13 @@ import "./mocks/MockDexV2Router.sol";
 import "./mocks/MockPair.sol";
 
 /**
- * @notice Minimal but meaningful tests for the CANONICAL SolumToken contract.
+ * @notice Minimal but meaningful tests for the CANONICAL Solum contract.
  * Focus:
  * - supply assigned to deployer
  * - pre-trading gate (non-exempt -> non-exempt blocked)
  * - enableTrading is owner-only
- * - transfer fees apply on wallet->wallet transfers (5% total; receiver gets ~95%)
- * - real burn on transfer reduces total supply by ~2% of transfer amount (transferFee split 2/3 burn/reflection)
+ * - transfer fees apply on wallet->wallet transfers (5% total; receiver gets 95%)
+ * - real burn on transfer reduces total supply by 2% of transfer amount
  *
  * We avoid triggering swapBack in tests (no sells to pair), keeping mocks minimal.
  */
@@ -28,7 +28,7 @@ contract SolumTokenTest is Test {
     MockDexV2Router internal router;
     MockPair internal pair;
 
-    SolumToken internal token;
+    Solum internal token;
 
     address internal alice;
     address internal bob;
@@ -43,12 +43,11 @@ contract SolumTokenTest is Test {
         router = new MockDexV2Router(BASE_WETH);
         pair = new MockPair();
 
-        // NOTE: constructor is (router, pair, treasury)
-        token = new SolumToken(address(router), address(pair), treasury);
+        token = new Solum(address(router), address(pair), BASE_WETH, treasury);
     }
 
     function testInitialSupplyMintedToOwner() public {
-        assertEq(token.balanceOf(owner), token.totalSupply(), "OWNER_NOT_FULL_SUPPLY");
+        assertEq(token.balanceOf(owner), token.totalSupply());
     }
 
     function testEnableTradingOwnerOnly() public {
@@ -57,7 +56,7 @@ contract SolumTokenTest is Test {
         token.enableTrading();
 
         token.enableTrading();
-        assertTrue(token.tradingEnabled(), "TRADING_NOT_ENABLED");
+        assertTrue(token.tradingEnabled());
     }
 
     function testPreTradingGateBlocksNonExemptTransfers() public {
@@ -73,13 +72,12 @@ contract SolumTokenTest is Test {
     function testTransferFeeAndBurnAfterTradingEnabled() public {
         token.enableTrading();
 
-        // Fund alice from exempt owner (no fee on this transfer)
+        // fund alice from exempt owner (no fee on this transfer)
         token.transfer(alice, 100 ether);
 
         uint256 supplyBefore = token.totalSupply();
 
         uint256 sendAmount = 10 ether;
-
         uint256 bobBefore = token.balanceOf(bob);
 
         vm.prank(alice);
@@ -87,22 +85,22 @@ contract SolumTokenTest is Test {
 
         uint256 bobAfter = token.balanceOf(bob);
 
-        // Transfer fee total initial is 5% => receiver should get ~95%
+        // Receiver should get 95% (5% total fee on transfer)
         uint256 expectedReceived = (sendAmount * 95) / 100;
 
-        // Allow small tolerance due to reflection rate integer division.
+        // Allow 1 wei rounding tolerance due to reflection rate integer division
         uint256 received = bobAfter - bobBefore;
         assertTrue(
             received == expectedReceived ||
-            received + 1 == expectedReceived ||
-            received == expectedReceived + 1,
+                received + 1 == expectedReceived ||
+                received == expectedReceived + 1,
             "RECEIVE_MISMATCH"
         );
 
-        // Transfer fee split: 2/3 burn over 5% total => burn is 2% of amount
+        // Burn on transfer is 2% of sendAmount -> supply must decrease by that amount
         uint256 expectedBurn = (sendAmount * 2) / 100;
         uint256 supplyAfter = token.totalSupply();
 
-        assertEq(supplyBefore - supplyAfter, expectedBurn, "BURN_SUPPLY_MISMATCH");
+        assertEq(supplyBefore - supplyAfter, expectedBurn);
     }
 }
