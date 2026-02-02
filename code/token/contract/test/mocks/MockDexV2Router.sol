@@ -1,31 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/**
- * @dev Minimal mock of a V2-style DEX router.
- * Only implements the functions required by SolumToken tests.
- */
 contract MockDexV2Router {
-    address public immutable WETH_ADDRESS;
+    address internal _weth;
 
-    constructor(address _weth) {
-        WETH_ADDRESS = _weth;
+    constructor(address weth_) {
+        _weth = weth_;
     }
 
     function WETH() external view returns (address) {
-        return WETH_ADDRESS;
+        return _weth;
     }
 
-    function getAmountsOut(
-        uint amountIn,
-        address[] calldata path
-    ) external pure returns (uint[] memory amounts) {
-        require(path.length >= 2, "INVALID_PATH");
-
-        // FIX: allocate array with correct length
-        amounts = new uint[](path.length);
-
-        // Simple 1:1 mock pricing
+    function getAmountsOut(uint amountIn, address[] calldata)
+        external
+        pure
+        returns (uint[] memory amounts)
+    {
+        // For tests: pretend 1:1 output
+        amounts = new uint;
         amounts[0] = amountIn;
         amounts[1] = amountIn;
     }
@@ -38,7 +31,10 @@ contract MockDexV2Router {
         address,
         uint
     ) external payable returns (uint amountToken, uint amountETH, uint liquidity) {
-        return (amountTokenDesired, msg.value, 1);
+        // minimal stub
+        amountToken = amountTokenDesired;
+        amountETH = msg.value;
+        liquidity = 1;
     }
 
     function swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -47,7 +43,7 @@ contract MockDexV2Router {
         address[] calldata,
         address,
         uint
-    ) external {
-        // no-op (mock)
+    ) external pure {
+        // no-op in tests
     }
 }
