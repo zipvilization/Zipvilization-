@@ -28,6 +28,7 @@ contract SolumTokenTest is Test {
     MockDexV2Router internal router;
     MockPair internal pair;
 
+    // NOTE: The contract is named Solum (not SolumToken)
     Solum internal token;
 
     address internal alice;
@@ -43,7 +44,8 @@ contract SolumTokenTest is Test {
         router = new MockDexV2Router(BASE_WETH);
         pair = new MockPair();
 
-        token = new Solum(address(router), address(pair), BASE_WETH, treasury);
+        // Solum constructor in this repo: (router, pair, treasury)
+        token = new Solum(address(router), address(pair), treasury);
     }
 
     function testInitialSupplyMintedToOwner() public {
@@ -78,6 +80,7 @@ contract SolumTokenTest is Test {
         uint256 supplyBefore = token.totalSupply();
 
         uint256 sendAmount = 10 ether;
+
         uint256 bobBefore = token.balanceOf(bob);
 
         vm.prank(alice);
@@ -91,9 +94,7 @@ contract SolumTokenTest is Test {
         // Allow 1 wei rounding tolerance due to reflection rate integer division
         uint256 received = bobAfter - bobBefore;
         assertTrue(
-            received == expectedReceived ||
-                received + 1 == expectedReceived ||
-                received == expectedReceived + 1,
+            received == expectedReceived || received + 1 == expectedReceived || received == expectedReceived + 1,
             "RECEIVE_MISMATCH"
         );
 
