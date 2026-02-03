@@ -1,136 +1,131 @@
-# Chapter 0 — Genesis
-
-Zipvilization begins here.
-
-Not with a launch.
-Not with a token.
-Not with a promise.
-
-With a repository.
+# 🟢 Chapter 0 — Genesis  
+**Existir sin fingir**
 
 ---
 
-## What Exists
+## What This Chapter Is
 
-At this stage, Zipvilization exists as:
+Chapter 0 — Genesis is the **foundational state** of Zipvilization.
 
-- A defined conceptual framework
-- A set of immutable ideas expressed in documentation
-- A technical repository containing draft and experimental components
-- A human authority that assumes responsibility without visibility
+At this stage, Zipvilization does not attempt to be:
+- a world
+- a game
+- a visualization
+- an experience
 
-There is no live system.
-There is no active economy.
-There are no guarantees.
+It attempts only one thing:
 
----
+> **to exist correctly on-chain**
 
-## What Does Not Exist
-
-As of Chapter 0:
-
-- No on-chain deployment is active
-- No liquidity pool exists
-- No token is live
-- No interface is canonical
-- No participant has privileged rights
-
-If something is not explicitly documented as deployed, it does not exist.
+Genesis establishes the system’s **right to exist** before it earns the right to evolve.
 
 ---
 
-## Why Genesis Matters
+## What Exists in Genesis
 
-Most systems begin by optimizing outcomes.
+Genesis is intentionally minimal, but fully real.
 
-Zipvilization begins by defining constraints.
+The following elements MUST exist and be operational:
 
-Genesis is not about growth.
-It is about coherence.
+- ✅ Solum token deployed on-chain
+- ✅ Fixed, explicit, and immutable rules
+- ✅ Public liquidity pool
+- ✅ Real transactions and holders
+- ✅ On-chain observability (raw, unsmoothed)
+- ✅ Verifiable supply, burn, and movement
 
-The purpose of this phase is to ensure that:
-- Rules can exist before incentives
-- Participation can precede speculation
-- Failure is acceptable and visible
+Everything that exists in Genesis is:
+- public
+- inspectable
+- reproducible
 
----
-
-## The Role of Code
-
-Code exists in this phase as:
-
-- A draft expression of rules
-- A testing ground for assumptions
-- A tool for exploration
-
-Code is not authority.
-Deployment is authority.
-
-Until deployment occurs, all code remains provisional.
+Nothing is abstracted or hidden.
 
 ---
 
-## Early Access in Genesis
+## What Does NOT Exist Yet
 
-Chapter 0 includes a coordinated early access mechanism.
+The absence of features is deliberate.
 
-This mechanism exists to:
-- Ensure sufficient initial participation
-- Prevent capture during low-density phases
-- Validate system behavior under minimal conditions
+Genesis explicitly does NOT include:
 
-Early access does not grant advantage.
-It grants presence.
+- ❌ World representation
+- ❌ Visual layers or maps
+- ❌ Narrative interpretation
+- ❌ Roles or classifications
+- ❌ UX optimization
+- ❌ Gamification
+- ❌ Promises of future utility
 
----
-
-## Observation Before Action
-
-Zipvilization prioritizes observation over execution.
-
-Before expanding:
-- Behavior must be visible
-- Failure modes must be understood
-- Density effects must be observed
-
-If observation reveals inconsistency, the correct response is not acceleration.
-
-It is pause.
+If something is not on-chain, it does not exist.
 
 ---
 
-## No Timelines
+## Purpose of Genesis
 
-Genesis has no deadline.
+Genesis serves one function:
 
-Progression to subsequent chapters depends on:
-- Structural coherence
-- Participation density
-- System behavior under real conditions
+> **prove that the substrate can survive reality**
 
-Time alone does not advance the system.
+This includes:
+- real users
+- real incentives
+- real mistakes
+- real inactivity
+- real edge cases
 
----
-
-## Transition to Chapter 1
-
-Chapter 1 begins only if:
-
-- Genesis remains coherent
-- Participation reaches sufficient distribution
-- Deployment is justified by observation, not pressure
-
-Until then, Zipvilization remains in Genesis.
+Genesis is successful if:
+- the system remains coherent
+- the rules do not require intervention
+- nothing needs to be “fixed” by adding layers above
 
 ---
 
-## Closing Note
+## Design Principle
 
-Genesis is not a beginning in the traditional sense.
+> **If the foundation is unstable, nothing above it is meaningful.**
 
-It is a commitment to not rush.
+Genesis prioritizes:
+- correctness over growth
+- clarity over appeal
+- restraint over ambition
 
-If Zipvilization proceeds beyond this chapter, it will do so
-because the system earned continuation.
+No higher chapter may begin until Genesis is considered complete.
 
-Not because it was demanded.
+---
+
+## Definition of Done (DoD)
+
+Chapter 0 is considered complete when:
+
+- Solum operates continuously without rule changes
+- On-chain activity exists and is observable
+- No off-chain logic is required to explain the system
+- The project can remain in this state indefinitely without harm
+
+Genesis does not expire.
+It becomes invisible only when stronger layers are added above it.
+
+---
+
+## Relationship to Future Chapters
+
+Genesis is the **anchor** for all future evolution.
+
+Every higher chapter must be able to answer:
+
+> “Would this still make sense if Genesis were the only thing that existed?”
+
+If the answer is no, the feature does not belong.
+
+---
+
+## Final Note
+
+Genesis is not exciting by design.
+
+It is calm.  
+It is quiet.  
+It is honest.
+
+That is its strength.
