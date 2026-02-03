@@ -1,13 +1,26 @@
-# Contracts (Phase 0 scaffolding)
+# shared/contracts
 
-This folder contains minimal Solidity scaffolding used as a boundary anchor.
+This folder is **NOT** the Solum contract.
 
-Scope:
-- Declare phases and control boundaries
-- Provide pause/resume mechanisms
-- Emit events for state transitions
+It exists only to provide **developer-facing artifacts** used by the off-chain stack:
+- Interfaces (`I*.sol`) for compile-time typing
+- Optional ABI JSON files (when generated)
+- Optional address maps (when deployment exists)
 
-Non-scope (Phase 0):
-- Tokenomics logic
-- Autonomous decision-making
-- Complex governance mechanics
+## ✅ Source of truth
+
+The **only canonical Solum implementation** lives here:
+
+- `code/token/contract/src/Solum.sol`
+
+If a rule is not present in that file, it does not exist on-chain.
+
+## 🚫 Hard rule (no duplicate logic)
+
+This folder must never contain:
+- a second copy of the Solum implementation
+- “core” variants
+- modified versions of Solum
+- partial implementations that can be confused with the real contract
+
+Interfaces only.
