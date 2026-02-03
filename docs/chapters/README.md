@@ -1,153 +1,177 @@
-# 📖 Chapters
-### The Story of a Civilization
-
-Zipvilization does not follow a traditional crypto roadmap.
-
-There are no milestones to hit.  
-There are no deadlines to promise.  
-There is no list of guaranteed features.
-
-Zipvilization unfolds through **chapters**.
-
-Each chapter represents a stage in the life of a civilization.
+# 📖 Zipvilization — Chapters  
+**Public progression, not a promise**
 
 ---
 
-## 🧭 What Chapters Are
+## What This Folder Is
 
-Chapters are not goals.
+This folder defines the **chapter system** of Zipvilization.
 
-They are:
-- moments in time
-- changes in conditions
-- shifts in how the system is perceived and lived
+Chapters are not marketing milestones.  
+They are **structural stages** of the civilization.
 
-A chapter does not end because a task is completed.
-It ends because the context has changed.
+Each chapter represents a level of system maturity:
+- technically
+- conceptually
+- socially
 
----
-
-## ⚠️ What Chapters Are Not
-
-Chapters are **not**:
-- commitments
-- delivery schedules
-- promises of development
-- investment milestones
-
-They do not guarantee progress.
-They describe **possibility**.
+Nothing here is speculative.
+Nothing here is hidden.
 
 ---
 
-## 🌱 Chapter 0 — Genesis
+## What a “Chapter” Means in Zipvilization
 
-The world does not exist yet.
+A chapter is:
 
-- the Solum contract is defined
-- the rules are written
-- nothing has happened on-chain
+- a **coherent system state**
+- a **publicly readable progression point**
+- a **shared reference** for users, builders, and observers
 
-This chapter is preparation.
+A chapter is **entered**, not launched.
 
-The soil exists only as code.
-
----
-
-## 🏕️ Chapter 1 — Colonization
-
-The world begins.
-
-- liquidity is created
-- colonists arrive
-- territory is claimed through participation
-
-Solum starts to move.
-The land becomes occupied.
-
-Nothing is visible yet,
-but existence has begun.
+If a chapter is active, it means:
+- the required systems are live
+- the guarantees described are true
+- the previous chapters are already fulfilled
 
 ---
 
-## 🧭 Chapter 2 — Interpretation
+## What Chapters Are NOT
 
-The world becomes readable.
+Chapters are not:
+- deadlines
+- promises
+- feature drops
+- marketing phases
 
-- data is observed
-- signals are structured
-- patterns start to appear
-
-Colonists can begin to understand
-how the world is forming.
-
-Meaning emerges from execution.
+Zipvilization does not “ship” chapters.
+It **reaches** them.
 
 ---
 
-## 🌍 Chapter 3 — World
+## Sequential and Non-Skippable
 
-The territory becomes a coherent world.
+Chapters are **strictly ordered**.
 
-- spatial structure appears
-- density and persistence are legible
-- history starts to matter
+You cannot jump to a later chapter without completing the previous ones.
 
-The system is no longer just economic.
-It feels inhabited.
+This is intentional:
+- complexity is cumulative
+- trust is cumulative
+- meaning is cumulative
 
----
-
-## 👁️ Chapter 4 — Perception
-
-The world becomes visible.
-
-- territory is rendered
-- activity is seen
-- time leaves visual traces
-
-Colonists can observe
-how the soil lives.
+Each chapter depends on the guarantees of the ones before it.
 
 ---
 
-## 🔮 Chapter 5 — Continuation
+## Overview of Chapters
 
-Beyond this point, nothing is predefined.
+### 🟢 Chapter 1 — Genesis
+The system exists.
 
-- new forms of interpretation may appear
-- new ways of observing the world may emerge
-- the civilization may stabilize, fragment, or stagnate
+- Solum is deployed
+- the on-chain substrate is immutable
+- the world’s total potential is defined
 
-This chapter has no description yet.
-
-A civilization that survives long enough
-writes its own future.
+Without Chapter 1, nothing else is possible.
 
 ---
 
-## 🧠 Why This Structure
+### 🟢 Chapter 2 — World Formation
+The world becomes observable.
 
-Civilizations are not built by schedules.
+- territory has structure
+- the map exists
+- SolumWorld becomes coherent
 
-They are shaped by:
-- time
-- participation
-- persistence
-- erosion
-
-Zipvilization chooses to describe
-**existence**, not promises.
+This is where “land” stops being abstract.
 
 ---
 
-## 🧭 Final Note
+### 🟢 Chapter 3 — Colonists
+Actors appear.
 
-If you are looking for guarantees,
-this is not the right place.
+- wallets become colonists
+- behavior becomes classifiable
+- roles emerge from actions
 
-If you are curious about whether
-a civilization can emerge from
-immutable rules and participation,
+The system gains population.
 
-you are already part of the story.
+---
+
+### 🟢 Chapter 4 — History
+Time becomes irreversible.
+
+- past states are preserved
+- evolution is visible
+- memory is part of the system
+
+Zipvilization gains continuity.
+
+---
+
+### 🌌 Chapter 5 — Emergence & Open Horizon
+The system stops being fully designed.
+
+- cognition is mature
+- the human factor dilutes
+- the community becomes structurally relevant
+
+The future is no longer prescribed.
+
+---
+
+## Why Chapters Exist
+
+Chapters exist to solve one problem:
+
+> How do you explain a living system without freezing it?
+
+The chapter system provides:
+- clarity without rigidity
+- progression without hype
+- openness without chaos
+
+It allows Zipvilization to grow **in public**, without pretending to know its final form.
+
+---
+
+## Relationship to the Rest of the Repository
+
+- `Solum` defines **what cannot change**
+- `Solumtools` defines **what can be observed**
+- `SolumWorld` defines **what exists**
+- `SolumView` defines **what is seen**
+- `chapters` define **when each layer becomes meaningful**
+
+This folder is the **temporal spine** of the project.
+
+---
+
+## Reading Guidance
+
+If you are new:
+1. Read chapters in order.
+2. Do not skip ahead.
+3. Treat each chapter as a *state*, not a goal.
+
+If you are technical:
+- chapters tell you **what must already be true**
+- never what *might* be built later
+
+If you are an observer:
+- chapters tell you **where the civilization is now**
+
+---
+
+## Core Principle
+
+Zipvilization does not promise a destination.
+
+It promises:
+- consistency
+- continuity
+- and the freedom to evolve without lying about it
+
+Chapters are how that promise stays honest.
