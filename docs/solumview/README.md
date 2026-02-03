@@ -1,175 +1,162 @@
-# 👁️ SolumView
-### Territorial Visualization Layer
+# 🧭 SolumView
 
-SolumView is the visual and dynamic representation of **Solum territory**.
+**SolumView** is the **final visualization and interaction layer** of **Zipvilization**.
 
-It is not a game.  
-It is not a strategy map.  
-It is not a financial interface.
+It is where all upstream systems — **Solum (token)** and **SolumWorld (state & rules)** —
+become **visible, navigable, and inspectable** by humans and AI.
 
-SolumView exists to **observe how the soil lives**.
-
----
-
-## 🧠 What SolumView Is
-
-SolumView is the close-range visualization layer of Zipvilization.
-
-Its role is to:
-- translate Solum state into visible territory
-- express activity through space and time
-- allow observation of the land as a lived surface
-
-SolumView does not interpret rules.  
-It does not alter execution.  
-It **renders territory**.
+SolumView does not decide reality.  
+It **renders** it.
 
 ---
 
-## 📏 Human Scale
+## 🧩 What SolumView IS
 
-SolumView operates at **real scale**.
+✅ A deterministic **view layer**  
+✅ A multi-zoom visual system  
+✅ A wallet-aware explorer  
+✅ A state-faithful renderer  
+✅ The last step before human perception  
 
-- **1 Solum = 1 square meter**
-- scale must feel human, not symbolic
-- territory occupies space
-
-Nothing is abstracted into icons or charts.  
-The land is meant to feel **physically present**.
-
----
-
-## 👛 Wallet View (Core Mode)
-
-SolumView is generated from the **wallet**.
-
-- the visible area is derived from wallet balance
-- the size of the terrain is automatic
-- there is **no free zoom**
-- there is **no manual camera control**
-
-The system decides:
-- which portion of the land is shown
-- how much territory fits on screen
-- how to preserve human scale and legibility
-
-The user does not control the view.  
-They **observe what their presence allows them to see**.
+SolumView turns **on-chain state** and **off-chain rules**
+into a **coherent visual surface**.
 
 ---
 
-## 🔍 Maximum Zoom (Design Principle)
+## 🚫 What SolumView is NOT
 
-SolumView operates at **maximum zoom**.
+❌ It does not modify SolumWorld state  
+❌ It does not execute economic logic  
+❌ It does not simulate outcomes  
+❌ It does not invent data  
+❌ It does not override canon  
 
-- the terrain fills 100% of the frame
-- the full property border is never visible
-- land continues beyond the screen
-- only a living fragment is shown
-
-This avoids the perception of total control
-and reinforces the idea of real spatial extension.
+If something is not defined upstream, SolumView **cannot display it**.
 
 ---
 
-## ⏳ Time as a Visual Variable
+## 🗂 Canonical Role inside Zipvilization
 
-SolumView is not static.
+Solum → economic substrate (token) 
+SolumWorld → rules, state, evolution 
+SolumView → visualization, navigation, inspection
 
-- changes are progressive
-- evolution is slow
-- territory reflects age and use
+SolumView is the **only layer exposed directly to users**.
 
-Young territories look different from older ones.
-
-Nothing appears complete by default.  
-Time must pass.
-
----
-
-## 👥 Zips
-
-Zips exist in SolumView.
-
-They are:
-- small
-- non-protagonist
-- functional indicators of activity
-
-Zips:
-- walk
-- work
-- interact with the environment
-- appear and disappear according to land use
-
-They do not represent characters.  
-They represent **life on the soil**.
+Everything shown here must be:
+- traceable
+- reproducible
+- explainable
 
 ---
 
-## 🏗️ Constructions and Land Use
+## 🔍 Zoom-Based Visualization
 
-Structures in SolumView are historical.
+SolumView renders the world through **progressive zoom levels**.
 
-- no sudden jumps
-- no instant final buildings
-- complexity increases gradually
+Each zoom:
+- reveals more detail
+- never contradicts higher or lower zooms
+- is derived from the same canonical data
 
-Examples:
-- simple fields → organized fields
-- informal paths → defined paths
-- basic structures → consolidated ones
+Typical behavior:
+- 🌍 High zoom → global patterns
+- 🗺 Medium zoom → regions / clusters
+- 🧱 Low zoom → parcels / units / structures
 
-Architecture is not decorative.  
-It records **what has happened over time**.
-
----
-
-## 🎨 Visual Language
-
-SolumView uses a strict visual language:
-
-- pixel art
-- 90s strategy inspiration
-- 16-bit allowed
-- flat colors
-- hard edges
-
-Not allowed:
-- blur
-- gradients
-- modern lighting
-- 3D
-- cinematic or painterly styles
-
-The style must remain **functional and readable**.
+Zooms are **views**, not states.
 
 ---
 
-## 🌱 What SolumView Shows
+## 👛 Wallet Mode
 
-SolumView shows:
-- soil
-- parcels
-- paths
-- fields
-- small functional structures
-- continuous low-level activity
+SolumView supports **Wallet Mode**.
 
-It does not show:
-- complete cities
-- abstract icons
-- heavy UI overlays
+A user can:
+- 🔗 connect their own wallet
+- 🔎 search any external wallet
+- 👁 visualize holdings and positions
+- 🧭 navigate the world **from that wallet’s perspective**
 
-Everything visible belongs to the territory.
+Wallet Mode:
+- does not grant privileges
+- does not alter state
+- only filters and contextualizes views
 
 ---
 
-## 🧭 Relationship to Other Layers
+## 🎨 Visual Determinism
 
-- **Solum** → immutable execution
-- **Solumtools** → structured signals
-- **SolumWorld** → world-scale interpretation
-- **SolumView** → lived territorial perception
+SolumView follows strict **visual determinism**.
 
-SolumView is where the territory is **experienced**.
+Given the same inputs:
+- the same state
+- the same wallet
+- the same zoom
+
+➡️ the output **must be identical**.
+
+No randomness.  
+No aesthetic drift.  
+No temporal inconsistency.
+
+Visuals are a **contract**, not decoration.
+
+---
+
+## 🧠 AI Compatibility
+
+SolumView is designed to be:
+- machine-readable
+- AI-navigable
+- structurally explicit
+
+An AI agent must be able to:
+- understand what it is seeing
+- know why it is seeing it
+- trace visuals back to source data
+
+This enables:
+- AI analysis
+- AI explanation
+- AI supervision
+
+---
+
+## 📐 Internal Documents
+
+This folder contains canonical specifications such as:
+
+- 📜 pipeline definitions
+- 🔎 zoom rules
+- 🎨 visual constraints
+- 👛 wallet behavior
+- 🧠 AI onboarding notes
+
+Each file refines **how SolumView behaves**, not what exists.
+
+---
+
+## 🧩 Design Principle
+
+> **SolumView shows reality.  
+> It never creates it.**
+
+If a visual cannot be justified by SolumWorld or Solum,
+it must not exist.
+
+---
+
+## 🔒 Canon Status
+
+This README is **canonical documentation**.
+
+Changes must be:
+- intentional
+- minimal
+- consistency-preserving
+
+SolumView stability is critical:  
+any drift here directly affects user trust.
+
+---
