@@ -1,136 +1,138 @@
-# 🧱 Solum — Territory Substrate
+# 🔍 Solumtools — Observation & Signals
 
-**Solum is the physical substrate of Zipvilization.**
+**Solumtools is how Zipvilization sees.**
 
-It exists on-chain as a fixed-supply token.  
-In Zipvilization, it exists as **land**.
+It does not act.  
+It does not decide.  
+It does not simulate.
 
----
-
-## 🌱 From Token to Territory
-
-The translation rule is simple and immutable:
-
-> **1 Solum = 1 square meter (1 m²)**
-
-This rule never changes.
-
-- Total Solum supply defines the **maximum possible world size**
-- Wallet balances define **owned territory**
-- Burned Solum defines **permanent geography**
-
-Nothing is symbolic.  
-Nothing is adjustable.
+Solumtools observes the blockchain and extracts **verifiable signals** that Zipvilization can later interpret.
 
 ---
 
-## 🗺️ World Size & Permanence
+## 👁️ From On-chain Data to Visibility
 
-### 🌍 Genesis World
-At deployment, Solum defines a fixed maximum world:
+Solumtools reads only public, verifiable sources:
 
-- **Genesis Supply** → Total possible land (m²)
-- This value is constant and known from day one
+- Solum smart contract
+- Solum liquidity pool
+- Transaction history
+- Chain time and blocks
 
-This is the *planetary boundary* of Zipvilization.
+From these, it produces **signals** — not opinions.
 
----
-
-### 🔥 Burned Territory (Permanent Geography)
-
-When Solum is burned on-chain:
-
-- Total supply decreases
-- That land **does not disappear**
-- It becomes **permanent geography**
-
-In Zipvilization, burned Solum is interpreted as:
-- forests
-- rivers
-- lakes
-- mountains
-- non-colonizable land
-
-Burn is not loss.  
-Burn is **world formation**.
+In Zipvilization, those signals become **what the user can inspect**.
 
 ---
 
-## 🧑‍🌾 Colonists & Ownership
+## 🧭 What Users Can See
 
-Every wallet holding Solum is a **colonist**.
+Through Solumtools, the interface can expose:
 
-For any wallet:
-- Solum balance → owned territory (m²)
-- Time held → age of territory
-- Movement → migration or redistribution
+### 🌍 Global Signals
+- Total world size (genesis supply)
+- Active territory (current supply)
+- Permanent geography (burned supply)
+- Protocol state (trading enabled, limits active)
 
-There is no registration.  
-There is no identity layer.
-
-Ownership is **purely on-chain**.
+These are shown as **world-level indicators**, not metrics to optimize.
 
 ---
 
-## 📐 Limits & Natural Constraints
+### 🧑‍🌾 Colonist (Wallet) Inspection
 
-Solum enforces limits at the contract level:
-- maximum transaction size
-- maximum wallet size (dynamic over time)
+For any wallet, users can inspect:
 
-In Zipvilization, these appear as:
-- natural expansion limits
-- early scarcity
-- gradual opening of space over time
+- Owned territory (m²)
+- Territory history over time
+- First appearance in the system
+- Activity footprint (movement, inactivity)
+- Interaction with the frontier (pool)
 
-Limits are not rules imposed by Zipvilization.  
-They are **physical laws of the world**.
-
----
-
-## ⏳ Time as a First-Class Dimension
-
-Solum does not reset.
-
-Every action accumulates:
-- territory changes
-- permanent geography
-- historical state
-
-Zipvilization reads Solum as a **timeline**, not a snapshot.
-
-What exists now is the result of everything that happened before.
+No wallet is hidden.  
+No view is privileged.
 
 ---
 
-## 🚫 What Solum Does NOT Mean
+### 🗺️ Territory Distribution
 
-Solum is **not**:
-- points
-- score
-- power
-- rank
-- governance weight
+Solumtools enables views such as:
+- largest landholders
+- long-standing territories
+- untouched (virgin) land
+- highly active zones
 
-Solum is **space**.
+These are **classifications**, not rankings.
 
-What you do with space is interpreted one layer above.
+They describe *what exists*, not *what should be*.
+
+---
+
+## 🧠 Roles as Footprints (Not Labels)
+
+Solumtools may classify observable roles based on behavior:
+
+- early colonists
+- inactive territories
+- frequent movers
+- major landholders
+- fertility contributors (burn / reflection paths)
+
+Important:
+- Roles are **descriptive**
+- A colonist can have multiple roles
+- Roles change over time
+
+Zipvilization interprets roles visually.  
+Solumtools only reports them.
+
+---
+
+## 📈 Time & History
+
+Solumtools tracks **history**, not just state:
+
+- when territory was acquired
+- how it changed
+- how long it persisted
+- how it interacted with the system
+
+This enables Zipvilization to show:
+- evolution
+- aging
+- stability
+- transformation
+
+---
+
+## 🚫 What Solumtools Never Does
+
+Solumtools does **not**:
+- predict outcomes
+- recommend actions
+- assign value judgments
+- hide or prioritize wallets
+- simulate alternate futures
+
+It is not a game system.  
+It is an observation layer.
 
 ---
 
 ## 🔗 Relationship to Other Layers
 
-- **Solumtools** reads Solum and extracts signals
-- **SolumWorld** organizes Solum into maps and states
-- **SolumView** renders Solum as something you can see and explore
+- **Solum** defines the substrate
+- **Solumtools** extracts signals
+- **SolumWorld** organizes signals into states
+- **SolumView** renders them visually
 
-Solum itself never changes meaning.
+Solumtools is the **lens**, not the world.
 
 ---
 
 ## 🧠 Core Principle
 
-> If land is real, it must be finite.
+> If something cannot be verified on-chain, it does not exist here.
 
-Solum defines that finiteness.  
-Zipvilization makes it visible.
+Solumtools makes the system **legible**,  
+so Zipvilization can make it **comprehensible**.
