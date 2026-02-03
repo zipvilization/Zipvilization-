@@ -232,6 +232,90 @@ If something is not deployed, it does not exist operationally.
 
 ---
 
+## 📘 Canon & Source of Truth
+
+This repository is the **canonical definition** of Zipvilization.
+
+GitHub is not a presentation layer.  
+It is not an onboarding surface.  
+It is not narrative-driven.
+
+Everything contained here exists to **define**, not to persuade.
+
+### What GitHub Is
+
+- The **single source of truth** for Zipvilization
+- The place where rules, structures, and limits are defined
+- Fully auditable by humans and machines
+- Written to be read literally, not interpreted
+
+If something is not defined here, it does not exist.
+
+### What GitHub Is Not
+
+- It is not marketing
+- It is not storytelling
+- It is not optimized for engagement
+- It is not adapted to any specific audience profile
+
+Other channels may **translate** Zipvilization.  
+This repository **defines** it.
+
+### Interpretation Layers
+
+Any future communication layer (frontend, articles, social channels) must follow this order:
+
+1. **GitHub defines**
+2. Other layers interpret
+
+Never the reverse.
+
+If an interpretation contradicts this repository,  
+the repository is correct and the interpretation is wrong.
+
+---
+
+## 🔍 Auditability
+
+All core concepts of Zipvilization are:
+
+- explicitly written
+- technically grounded
+- internally consistent
+- independently verifiable
+
+This repository is designed to remain valid even if:
+- interfaces change
+- narratives evolve
+- external platforms disappear
+
+Zipvilization does not depend on explanation.  
+It depends on definition.
+
+---
+
+## 🧠 Why This Matters
+
+Zipvilization does not ask for belief.
+
+It allows inspection.
+
+Anyone can read the rules.  
+Anyone can verify the execution.  
+Anyone can disagree — but only after understanding what is actually defined.
+
+This is not a promise of outcome.  
+It is a commitment to coherence.
+
+---
+
+## 🔒 Final Rule
+
+> GitHub is the canonical layer.  
+> Everything else is a mirror.
+
+---
+
 ## ➡️ Moving Forward
 
 Zipvilization does not promise outcomes.
