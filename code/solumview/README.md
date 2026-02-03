@@ -1,148 +1,206 @@
-# 🧭 SolumView (code)
+# 🎨 SolumView — Visual Contracts
 
-SolumView is the **render contract layer** of Zipvilization.
+**Deterministic world rendering · Read-only · Canonical**
 
-It does not fetch chain data.
-It does not interpret markets.
-It does not change meaning.
+SolumView is the **visual contract layer** of Zipvilization.
 
-SolumView does one job: **turn a verified, normalized input into a deterministic visual state**.
+It does not interpret meaning.  
+It does not access the blockchain.  
+It does not modify state.
 
-This folder is **implementation-facing canon**.  
-The public-facing canon lives in `docs/SolumView/`.
-
----
-
-## ✅ What SolumView Is
-
-SolumView is a **pure rendering module** defined by contracts:
-
-- It receives a **Render Input** (already normalized upstream).
-- It applies **Zoom + Tile + UI + Evolution rules**.
-- It outputs a **deterministic render plan** (or a deterministic UI state).
-
-SolumView is designed so that:
-- the same input → always yields the same output
-- across machines, builds, and time
-- with explicit versioning (`v1` contracts)
+SolumView takes **validated world state** and transforms it into a
+**deterministic visual representation**.
 
 ---
 
-## 🚫 What SolumView Is NOT
+## 🧱 What This Folder Is
 
-SolumView is NOT:
-- a chain indexer
-- a pricing oracle
-- a treasury dashboard
-- a gameplay engine
-- a simulation that “balances” reality
+This folder contains the **canonical visual contracts** used by SolumView.
 
-If a field is not present in the input, SolumView does not invent it.
+Each file defines a **strict, versioned, read-only contract** that maps
+structured data into visual output.
 
----
+These contracts:
 
-## 📚 Canonical Specs (Docs)
+- 📥 receive **validated inputs**
+- 🧮 apply **pure deterministic rules**
+- 🎨 output **render-ready structures**
 
-SolumView code must remain coherent with:
-
-- `docs/SolumView/README.md`
-- `docs/SolumView/PIPELINE_CANON.md`
-- `docs/SolumView/ZOOM_MAPPING.md`
-- `docs/SolumView/ICONS_CONTRACT.md`
-- `docs/SolumView/UI_CONTRACT.md`
-- `docs/SolumView/WALLET_MODE.md`
-- `docs/SolumView/VISUAL_DETERMINISM.md`
-
-Docs define the rules.  
-Code implements the rules.
+There is **no logic duplication** and **no business rules** here.
 
 ---
 
-## 📦 Contracts (code/solumview/contracts)
+## 🚫 What This Folder Is NOT
 
-This repository currently defines the following canonical contracts:
+SolumView contracts do **not**:
 
-- `render-input.v1.ts`  
-  Defines the **minimum stable input surface** SolumView expects.
+- ❌ read from the blockchain
+- ❌ infer meaning or narrative
+- ❌ apply economic logic
+- ❌ mutate or store state
+- ❌ react to user actions
 
-- `zoom.contract.v1.ts`  
-  Defines zoom levels and how view parameters are derived deterministically.
-
-- `tile-dictionary.v1.ts`  
-  Defines the **tile vocabulary** (the canonical set of tiles a renderer may place).
-
-- `tilemap.contract.v1.ts`  
-  Defines how tiles are mapped/placed for a given render request.
-
-- `icon_catalog.contract.v1.ts`  
-  Defines the canonical icon set used by the UI layer.
-
-- `ui_tokens.contract.v1.ts`  
-  Defines canonical UI tokens/state codes used in the interface.
-
-- `walletmode.contract.v1.ts`  
-  Defines how Wallet Mode selects and validates a target wallet (read-only).
-
-- `evolution.contract.v1.ts`  
-  Defines Evolution Mode / time-travel rules and snapshot selection policy.
-
-- `visual_determinism.contract.v1.ts`  
-  Defines reproducibility rules and what is allowed or forbidden for determinism.
+They only **render what already exists**.
 
 ---
 
-## 🔁 Canonical Load Order (Renderer)
+## 🧠 Contract Design Principles
 
-A renderer/frontend should load and apply contracts in this order:
+All contracts in this folder follow the same principles:
 
-1. **Render Input** (`render-input.v1.ts`)  
-   Validate that the request matches the canonical input surface.
+- 🔒 **Read-only**
+- 🧬 **Deterministic**
+- 🧾 **Versioned (`v1`)**
+- 📐 **Pure functions**
+- 🔗 **Composable**
+- 🧪 **Testable in isolation**
 
-2. **Wallet Mode** (`walletmode.contract.v1.ts`)  
-   Resolve the target wallet context (connected wallet or public lookup).
-
-3. **Evolution** (`evolution.contract.v1.ts`)  
-   Resolve the time context (moment 0, snapshot, or head).
-
-4. **Zoom** (`zoom.contract.v1.ts`)  
-   Resolve view parameters and level of detail.
-
-5. **Tile Dictionary** (`tile-dictionary.v1.ts`)  
-   Load the tile vocabulary required by the tilemap.
-
-6. **Tilemap** (`tilemap.contract.v1.ts`)  
-   Produce the deterministic tile placement / render plan.
-
-7. **UI Tokens + Icons** (`ui_tokens.contract.v1.ts`, `icon_catalog.contract.v1.ts`)  
-   Map internal state codes to canonical UI representation.
-
-8. **Visual Determinism** (`visual_determinism.contract.v1.ts`)  
-   Enforce reproducibility constraints and emit audit-friendly metadata.
-
-This order is intentional: upstream resolution (who/when/zoom) happens before placing tiles.
+Given the same input → the same output **must always be produced**.
 
 ---
 
-## 🧱 Determinism Rules (Non-Negotiable)
+## 📦 Canonical Contracts
 
-SolumView MUST:
-- avoid randomness unless explicitly seeded by canonical input
-- avoid device-dependent rendering paths
-- avoid implicit time dependencies (must be explicit via Evolution context)
-- avoid network reads inside contracts
+### 🗺️ `tilemap.contract.v1.ts`
+Defines the **spatial structure** of the world.
 
-Any renderer that consumes SolumView must be able to:
-- reproduce a view by reusing the same input
-- audit the outputs (inputs + contract versions + hashes)
+- Maps territory into tiles
+- Defines grid layout and boundaries
+- Produces the base world geometry
 
 ---
 
-## 🔒 Versioning
+### 🧱 `tile-dictionary.v1.ts`
+Defines the **meaning of tile types**.
 
-Contracts are versioned.
+- Terrain categories
+- Land states
+- Environmental classifications
 
-- `*.contract.v1.ts` and `*.v1.ts` are **stable v1** surfaces.
-- New versions must be introduced as `v2`, without mutating `v1` behavior.
+Used by the tilemap to assign semantic tiles.
 
-Backwards compatibility is part of the canon.
+---
 
+### 🔍 `zoom.contract.v1.ts`
+Controls **level-of-detail rules**.
+
+- Defines zoom levels
+- Maps scale → visible detail
+- Ensures consistent perception across views
+
+---
+
+### 🧬 `evolution.contract.v1.ts`
+Defines **time-based visual evolution**.
+
+- Past → present transitions
+- Growth stages
+- World aging rules
+
+No simulation. Only visual progression.
+
+---
+
+### 👁️ `visual_determinism.contract.v1.ts`
+Guarantees **reproducibility**.
+
+- Ensures identical inputs render identically
+- Locks randomness sources
+- Enforces auditability
+
+This is a **non-negotiable contract**.
+
+---
+
+### 🧾 `render-input.v1.ts`
+Defines the **exact input schema** expected by SolumView.
+
+- Normalized data structure
+- Fully validated before rendering
+- No optional ambiguity
+
+Everything rendered must conform to this schema.
+
+---
+
+### 🎨 `icon_catalog.contract.v1.ts`
+Maps **world state → visual symbols**.
+
+- Icons
+- Glyphs
+- Visual tokens
+
+Pure mapping. No interpretation.
+
+---
+
+### 🧭 `ui_tokens.contract.v1.ts`
+Defines **UI-level visual tokens**.
+
+- Colors
+- Layers
+- UI primitives
+
+Shared language between rendering and interface.
+
+---
+
+### 👛 `walletmode.contract.v1.ts`
+Defines **Wallet Mode visualization**.
+
+- Connect own wallet
+- Inspect any public wallet
+- Render wallet as territory
+
+Wallet Mode is **read-only** and **public**.
+
+---
+
+## 🔗 Pipeline Binding (Conceptual)
+
+SolumTools → SolumWorld → SolumView Contracts → Renderer
+
+- SolumTools: extract signals
+- SolumWorld: define world state
+- SolumView Contracts: define how it looks
+- Renderer: draws pixels
+
+Each layer is isolated.
+Each layer is auditable.
+
+---
+
+## 🧭 Position in Zipvilization
+
+SolumView contracts sit between:
+
+- 🌍 **SolumWorld** — what exists
+- 🖼️ **Renderer** — what is drawn
+
+They do not decide meaning.  
+They decide **form**.
+
+---
+
+## 🔒 Canonical Status
+
+All contracts in this folder are:
+
+- Canonical
+- Versioned
+- Immutable by convention
+
+Any change requires:
+- a new version
+- explicit documentation
+- full auditability
+
+---
+
+## ✨ Final Note
+
+If Zipvilization is a readable civilization,  
+SolumView is its **visible surface**.
+
+Nothing more.  
+Nothing less.
