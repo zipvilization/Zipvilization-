@@ -15,7 +15,10 @@ import "./mocks/MockPair.sol";
  * - transfer fees apply on wallet->wallet transfers (5% total; receiver gets 95%)
  * - real burn on transfer reduces total supply by 2% of transfer amount
  *
- * We avoid triggering swapBack in tests (no sells to pair), keeping mocks minimal.
+ * Notes:
+ * - The canonical contract now resolves WETH via router.WETH().
+ * - Therefore we pass ONLY (router, pair, treasury) to Solum constructor.
+ * - We avoid triggering swapBack in tests (no sells to pair), keeping mocks minimal.
  */
 contract SolumTokenTest is Test {
     // Canonical WETH on Base (valid EVM address; it doesn't need to exist on local VM)
@@ -28,7 +31,6 @@ contract SolumTokenTest is Test {
     MockDexV2Router internal router;
     MockPair internal pair;
 
-    // NOTE: The contract is named Solum (not SolumToken)
     Solum internal token;
 
     address internal alice;
@@ -41,10 +43,11 @@ contract SolumTokenTest is Test {
         alice = address(0xA11CE);
         bob = address(0xB0B);
 
+        // Router mock returns BASE_WETH via WETH()
         router = new MockDexV2Router(BASE_WETH);
         pair = new MockPair();
 
-        // Solum constructor in this repo: (router, pair, treasury)
+        // ✅ Updated constructor signature: (router, pair, treasury)
         token = new Solum(address(router), address(pair), treasury);
     }
 
@@ -80,7 +83,6 @@ contract SolumTokenTest is Test {
         uint256 supplyBefore = token.totalSupply();
 
         uint256 sendAmount = 10 ether;
-
         uint256 bobBefore = token.balanceOf(bob);
 
         vm.prank(alice);
@@ -94,7 +96,9 @@ contract SolumTokenTest is Test {
         // Allow 1 wei rounding tolerance due to reflection rate integer division
         uint256 received = bobAfter - bobBefore;
         assertTrue(
-            received == expectedReceived || received + 1 == expectedReceived || received == expectedReceived + 1,
+            received == expectedReceived ||
+            received + 1 == expectedReceived ||
+            received == expectedReceived + 1,
             "RECEIVE_MISMATCH"
         );
 
