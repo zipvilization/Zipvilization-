@@ -1,40 +1,24 @@
 [profile.default]
-# Core paths
-src = "src"
-test = "test"
-out = "out"
-libs = ["lib"]
-
-# Solidity / EVM
+# Solidity version (must match contract pragma expectations)
 solc_version = "0.8.20"
-evm_version = "paris"
+
+# Enable optimizer (REQUIRED for via-ir)
 optimizer = true
 optimizer_runs = 200
 
-# Testing
-verbosity = 2
-ffi = false
+# Critical: compile using Solidity IR pipeline
+# This resolves "Stack too deep" in complex canonical contracts
+via_ir = true
 
-# Fuzzing (clean, no warnings)
+# Standard Foundry paths (safe defaults)
+src = "src"
+out = "out"
+libs = ["lib"]
+
+# Test configuration
+test = "test"
+cache_path = "cache"
+
+# Fuzzing defaults (no impact on build)
 [fuzz]
 runs = 256
-
-# RPCs (optional, safe defaults)
-[rpc_endpoints]
-base = "https://mainnet.base.org"
-
-# Formatter
-[fmt]
-line_length = 100
-tab_width = 4
-bracket_spacing = true
-
-# Profiles for CI (explicit but minimal)
-[profile.ci]
-src = "src"
-test = "test"
-out = "out"
-libs = ["lib"]
-verbosity = 3
-optimizer = true
-optimizer_runs = 200
