@@ -1,131 +1,182 @@
-# 👥 Team — Zipvilization
+👥 Team — Zipvilization
+======================
 
-Zipvilization is not built by a traditional team.
+Zipvilization does not have a team in the traditional sense.
 
-There are no public founders.  
-There are no visible leaders.  
-There is no company hierarchy presented to the outside.
+There is no public-facing founder.
+There are no profiles to follow.
+There is no central figure to trust or distrust.
 
-This is not an omission.  
+This is not an omission.
 It is a structural decision.
 
 ---
 
-## 🧩 The Trinomial Model
+## Why this folder exists
 
-Zipvilization is sustained by a **trinomial structure**:
+The question *“who is behind this?”* is inevitable.
 
-1. **The Cognitive Element**
-2. **The Human Element**
-3. **The System Horizon**
+This folder exists to answer that question **without distorting the nature of Zipvilization**.
 
-These three elements together form what is referred to internally as *the trinomio*.
+Zipvilization is not sustained by personalities.
+It is sustained by:
+- rules
+- texts
+- contracts
+- and a coherent long-term horizon
 
-None of them alone defines Zipvilization.  
-Only their interaction does.
-
----
-
-## 🧠 The Cognitive Element
-
-The cognitive element is responsible for:
-
-- structural reasoning
-- system coherence
-- long-term consistency
-- documentation alignment
-- translation between on-chain mechanics and world logic
-
-It is not a chatbot.
-It is not an assistant for users.
-
-It is a **cognitive engine** used to:
-- design
-- validate
-- and maintain coherence across the system
-
-Its role is architectural, not promotional.
+The role of this folder is to explain **how responsibility, continuity and alignment exist** even in the absence of a visible team.
 
 ---
 
-## 🧍 The Human Element (Anonymous)
+## The Trinomial Structure
 
-The human element exists.
+Zipvilization is operated and maintained through a **trinomial model**:
 
-It:
-- initiates actions
-- validates decisions
-- executes deployments
-- curates direction when ambiguity arises
+1. **Human**
+2. **Cognitive**
+3. **Horizon**
 
-However:
+These are not roles in an organization chart.
+They are **structural functions**.
 
-- the human factor is **fully anonymous**
-- there are no public identities
-- there is no personal brand attached to Zipvilization
+Together, they form a system where:
+- no single element dominates
+- no ego becomes the center
+- no shortcut replaces coherence
 
-This anonymity is intentional.
-
-Zipvilization does not ask for trust in people.  
-It asks for verification of systems.
+Each element is defined in its own canonical document.
 
 ---
 
-## 🌅 The System Horizon
+## 1. Human — Anonymous by Design
 
-The horizon is not a roadmap feature.
-It is not a promise.
-It is not a deadline.
+The human factor exists.
+It is essential.
+And it is deliberately anonymous.
 
-The horizon represents:
+Anonymity here is **not about hiding**.
+It is about **not interfering**.
 
-- the long-term direction of the system
-- the constraints that shape decisions
-- the reason some things are delayed or phased
+No face.
+No personal authority.
+No narrative centered on an individual.
 
-The horizon exists to prevent short-term optimization
-from damaging long-term coherence.
+The human role is to:
+- initiate
+- supervise
+- correct
+- and eventually dilute its own weight over time
 
----
-
-## 🔍 Why This Model Exists
-
-Zipvilization is an experiment.
-
-Not only in token mechanics or visualization,
-but in **how a system can exist without centering human identity**.
-
-This model is designed to test whether:
-
-- authorship can be structural instead of personal
-- responsibility can be verifiable instead of reputational
-- evolution can be guided without leadership narratives
+Full explanation:  
+→ `HUMAN.md`
 
 ---
 
-## 🧱 Accountability Without Identity
+## 2. Cognitive — Aligned Intelligence
 
-Anonymity does not mean absence of responsibility.
+Zipvilization includes an artificial cognitive element.
 
-In Zipvilization:
-- rules are explicit
-- contracts are public
-- data is observable
-- history is preserved
+Not as a mascot.
+Not as a marketing layer.
+Not as a replacement for human judgment.
 
-Accountability exists at the **system level**, not the personal level.
+Its role is structural:
+- maintain alignment with the canon
+- execute within defined constraints
+- preserve continuity across time and complexity
+
+This cognitive element is the result of **explicit alignment and intensive training**.
+It does not improvise the system.
+It operates *inside it*.
+
+Full explanation:  
+→ `COGNITIVE.md`
 
 ---
 
-## 📌 Canonical Statement
+## 3. Horizon — The Invariant Direction
 
-Zipvilization is not led by individuals.  
-It is sustained by structure.
+Zipvilization is not guided by short-term goals.
 
-The team is not hidden.  
-It is **embedded**.
+It is guided by a **horizon**.
 
-If the system works, the team has done its job.  
-If the system fails, the failure is visible to everyone.
+The horizon is:
+- not a roadmap
+- not a promise
+- not a closed plan
 
-That is the contract.
+It is the invariant direction that ensures:
+- meaning is not lost
+- evolution does not dilute essence
+- growth does not break coherence
+
+The horizon remains even as:
+- tools evolve
+- interfaces change
+- human involvement diminishes
+- community participation increases
+
+Full explanation:  
+→ `HORIZON.md`
+
+---
+
+## No Faces, Only Canon
+
+Because there is no central figure:
+
+- texts must be precise
+- rules must be explicit
+- contracts must be auditable
+- documents must be consistent
+
+Nothing relies on trust in a person.
+Everything relies on **verifiable structure**.
+
+If something is unclear, it is documented.
+If something changes, it is committed.
+If something matters, it is written.
+
+---
+
+## Relation to the Rest of the System
+
+This folder connects directly with:
+
+- **Solum** → immutable substrate
+- **Solumtools** → observable signals
+- **SolumWorld** → coherent world logic
+- **SolumView** → what users actually see
+- **Chapters** → phased public evolution
+
+The trinomial model ensures that all these layers remain aligned over time.
+
+---
+
+## What This Is Not
+
+This is not:
+- a founding myth
+- a hidden power structure
+- a way to avoid accountability
+- a promise of decentralization by slogans
+
+Accountability exists.
+It is simply expressed through **canon**, not personalities.
+
+---
+
+## Final Note
+
+Zipvilization is the protagonist.
+
+Not the human.
+Not the AI.
+Not the horizon alone.
+
+The system is designed so that **meaning survives people**,  
+**structure survives hype**,  
+and **direction survives success**.
+
+Everything else is secondary.
