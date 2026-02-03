@@ -1,191 +1,151 @@
-# 📚 Documentation
+# 📚 Docs — Canonical Documentation (Zipvilization)
 
-This documentation is organized around **two complementary dimensions**:
+GitHub is the **technical, canonical truth layer** of Zipvilization.
 
-- 🧱 **Blocks** → what exists
-- ⏳ **Chapters** → when it unfolds
+- Everything here is written to be **auditable** (by humans and by AI).
+- Nothing here is “marketing”.
+- If something is not described in the repo (or not deployed on-chain), it **does not exist operationally**.
 
-Use this page as the **single entry point** into Zipvilization’s documentation.
-
----
-
-## 🧱 Canonical Blocks
-
-### 🔒 Block 0 — Solum  
-**Immutable Substrate**
-
-Solum is the on-chain foundation: contract rules, taxes, limits, and launch discipline.
-
-➡️ See: `docs/solum/README.md`
+Other channels (web / Medium / X) may explain the same ideas with a more accessible tone,
+but **this folder is the source of truth**.
 
 ---
 
-### 🛠️ Block 1 — Solumtools  
-**Interpretation Tools**
+## 🧭 How to Read These Docs
 
-Solumtools translate contract and market activity into interpretable signals and interfaces.
+Zipvilization has two simultaneous needs:
 
-➡️ See: `docs/solumtools/README.md`
+1) **Technical correctness** (immutable rules, derivations, constraints)
+2) **Readable meaning** (what users will actually see in the interface)
 
----
-
-### 🌍 Block 2 — Solumworld  
-**World Layer**
-
-Solumworld turns interpreted signals into a coherent, readable system over time.
-
-➡️ See: `docs/solumworld/README.md`
+For that reason, docs are split into:
+- **technical layers** (how the system works)
+- **translation layers** (how the system becomes a world in the frontend)
 
 ---
 
-### 🎨 Block 3 — Solumview  
-**Visual Canon**
+## 🧱 The Technical Layers (Truth Layer)
 
-Solumview defines the visual and UI language used to make Zipvilization perceptible.
+These folders describe *what exists* and *how it is derived*.
 
-➡️ See: `docs/solumview/README.md`
+### 🔒 `solum/`
+The on-chain substrate.
+The immutable token contract layer, constraints, and mechanical reality.
 
----
+→ Read if you want the rules.
 
-## ⏳ Chapters (Roadmap)
+### 🛠️ `solumtools/`
+The interpretation tool layer.
+Defines **how to read on-chain data**, compute signals, and produce consistent outputs.
 
-Zipvilization unfolds in **chapters**.
+→ Read if you want verifiable metrics and schemas.
 
-Chapters are **not promises**.  
-They describe *when* certain layers become observable.
+### 🌍 `solumworld/`
+The world coherence layer.
+Defines zoom structure, evolution rules, state model, invariants, and transitions.
 
----
+→ Read if you want the “world logic” that sits above raw metrics.
 
-### 🧬 Chapter 0 — Genesis  
-*(Current state)*
+### 👁️ `solumview/`
+The visual/UX expression layer.
+Defines how the world becomes a deterministic, consistent interface: zoom behavior, wallet mode, UI determinism.
 
-- No canonical on-chain deployment  
-- Code exists as experimentation  
-- Documentation defines scope and constraints  
-- Coherence before execution  
-
----
-
-### 🚪 Chapter 1 — Colonization
-
-- Liquidity pool is created  
-- Solum becomes accessible to colonists (holders)  
-- Transfers, accumulation, and movement begin  
-- Territory exists but is not yet visible  
+→ Read if you want what the user will actually experience.
 
 ---
 
-### 📊 Chapter 2 — Solumtools
+## 🪞 The Translation Layer (User-Facing Meaning)
 
-- Contract and market data become observable  
-- Signals are interpreted and exposed  
-- Colonists can begin to see their territory  
+### 🎛️ `zipvilization/`
+This folder is the “mirror”.
+It translates the technical layers into **what the user sees and understands** in the frontend.
 
----
+It answers:
+- What does a user see?
+- What options exist?
+- What does each code / metric represent in the interface?
+- How do Solum/Solumtools/Solumworld/Solumview map into UX?
 
-### 🌐 Chapter 3 — Solumworld
-
-- Interpreted data forms a coherent world layer  
-- History, state, and evolution become readable  
-
----
-
-### 🖼️ Chapter 4 — Solumview
-
-- The world is expressed visually  
-- 16-bit language reinforces the sense of place  
-- Territory and activity become perceptible  
+This is not lore or narrative.
+It is **technical translation**.
 
 ---
 
-### 🌱 Chapter 5 — Beyond
+## 🧩 Roadmap as Chapters
 
-- Interaction layers may emerge  
-- Wallets may become interfaces  
-- New forms of participation may appear  
+### 📖 `chapters/`
+Zipvilization is built in chapters, not as a single launch of everything at once.
 
-This chapter remains intentionally open.
+This folder defines:
+- what is included in each chapter
+- what is intentionally see-through / incomplete early
+- what becomes possible only once previous chapters are stable
 
----
-
-## 📐 Documentation Rules
-
-- One source of truth per topic  
-- Avoid duplication across blocks  
-- Blocks explain **what exists**  
-- Chapters explain **when it appears**  
+Chapter 5 is the horizon expansion: once Zipvilization is real, the system becomes open-ended without losing essence.
 
 ---
 
-## ➕ Additional Context (Conceptual Extension)
+## 🧑‍🚀 Project Canon (Non-technical but still canonical)
 
-The structure above is intentionally minimal.
+### 🗂️ `project/`
+Project-level canonical docs that must stay stable and auditable:
 
-Zipvilization starts from a simple but open question:
+- **Lore / Genesis** (how the world is framed)
+- **Token Launch** (where and how it happens)
+- **Early Access** (why it exists; whitelist mechanism may be defined later)
+- **Communication** (why no Discord/Telegram; how official channels work)
 
-> **Is it possible that a token, a contract, and a set of immutable rules
-> generate not just an economy, but the foundations of a civilization?**
-
-This documentation does not attempt to answer that question upfront.  
-It defines the conditions under which the answer could emerge.
-
----
-
-## 🪨 Why Solum Is the Way It Is
-
-Solum is deliberately restrictive.
-
-Its taxes, limits, and mechanics are not optimizations for price or hype.
-They exist to enforce **time**, **distribution**, and **persistence**.
-
-At the contract level:
-- a holder is a holder
-- a token is a token
-- a transfer is a transfer
-
-At the Zipvilization level:
-- a holder becomes a **colono**
-- a balance becomes **territory**
-- on-chain activity becomes **history**
-
-The contract does not tell a story.  
-It protects the conditions that make a story possible.
+These documents are still “truth layer”:
+they define constraints and intent, not hype.
 
 ---
 
-## 🔁 About Taxes (High-Level Meaning)
+## 🧬 The Team (Trinomio)
 
-Taxes in Solum are not punitive mechanics.
+### 🧠 `team/`
+Zipvilization is not built like a conventional crypto project.
+The team is the trinomio:
 
-They serve three simultaneous purposes:
+- **Human Factor** (anonymous, non-protagonist)
+- **Cognitive Engine (AI)** (aligned execution + development capacity)
+- **Horizon** (inmutable direction, open-ended after Chapter 5)
 
-1. **Structural stability**  
-   Preventing extractive behavior during fragile phases.
-
-2. **Colonist alignment**  
-   Rewarding long-term holders through reflection and persistence.
-
-3. **Evolution capacity**  
-   Treasury growth translates into resources for development, tooling,
-   and expansion of the Zipvilization experience.
-
-In Zipvilization terms:
-
-- Burn → scarcity and soil memory  
-- Reflection → passive participation  
-- Liquidity → world stability  
-- Treasury → **evolution**
+No ego. No face. No personality cult.
+The protagonist is Zipvilization.
 
 ---
 
-## 🧠 Final Note
+## 🌱 Vision (High-level framing)
 
-Zipvilization does not deny speculation.  
-It accepts that many will arrive as investors.
+### `vision.md`
+One-page orientation: what Zipvilization is, why it exists, what it tries to observe.
 
-What it proposes is different:
+---
 
-To translate that reality into something readable, persistent,
-and potentially meaningful over time.
+# ✅ Recommended Reading Paths
 
-This documentation exists to make that translation possible.
+## Path A — Technical Audit (most strict)
+1. `solum/`
+2. `solumtools/`
+3. `solumworld/`
+4. `solumview/`
+
+## Path B — “What will users see?”
+1. `zipvilization/`
+2. `solumview/`
+3. `solumworld/`
+
+## Path C — Project understanding (canonical intent)
+1. `project/`
+2. `chapters/`
+3. `team/`
+
+---
+
+## ⚠️ Canon Rule
+
+If a rule is not written in the repo,
+and not enforceable by the deployed contract(s),
+it does not exist.
+
+This folder is where Zipvilization stays coherent.
