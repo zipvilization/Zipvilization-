@@ -15,10 +15,10 @@ Solumtools exists to **observe**, **extract**, and **translate** on-chain activi
 
 Solumtools is a set of tools and definitions that:
 
-- Read **public on-chain data** from the Solum contract
-- Extract **structural signals** (supply, movement, limits, taxes, treasury)
-- Organize those signals into **coherent, interpretable states**
-- Prepare the data for its interpretative mirror inside **Zipvilization**
+- Read **public on-chain data** from the Solum contract and its market interface
+- Extract **structural signals** (supply, movement, limits, fees, treasury flows)
+- Normalize those signals into **coherent, deterministic states**
+- Prepare the data for its interpretative mirrors in **SolumWorld** and **SolumView**
 
 Solumtools is not narrative.  
 It is **pre-narrative**.
@@ -31,11 +31,11 @@ Solumtools focuses on **visibility and structure**, not judgment.
 
 It enables:
 
-- 📊 Observation of **all wallets / territories**
-- 🔎 Search and inspection of **any colonist (holder)**
+- 📊 Observation of **any wallet / territory**
+- 🔎 Search and inspection of **any colonist**
 - 📐 Measurement of territory size, age, and activity
 - ⏳ Tracking of historical evolution over time
-- 🧱 Classification of roles based on **behavioral signals**, never intent
+- 🧱 Classification of roles based on **verifiable behavioral signals**
 
 Everything Solumtools reads is already public on-chain.  
 Solumtools only makes it **legible**.
@@ -46,14 +46,14 @@ Solumtools only makes it **legible**.
 
 Solumtools does not define *good* or *bad* actors.
 
-Every action has a **function**.
+Every on-chain action has a **function** within the system.
 
 Examples of observable roles:
-- Long-standing colonists (early or persistent holders)
-- Inactive territories (virgin land, untouched)
-- Highly active territories (frequent transfers)
-- Large landholders
-- Contributors to fertility (burn) and reflection dynamics
+- Veteran colonists (early or persistent holders)
+- Virgin territories (untouched land)
+- Highly active territories
+- Major landholders
+- Contributors to burn, liquidity, or reflection dynamics
 
 All roles coexist.  
 All contribute to the system’s evolution.
@@ -62,7 +62,7 @@ All contribute to the system’s evolution.
 
 ## 🌍 Open World by Design
 
-Solumtools is **open to the world**:
+Solumtools is **open by default**:
 
 - Any wallet can be observed
 - Any territory can be inspected
@@ -85,7 +85,7 @@ Solumtools is **not**:
 - A simulation of Zipvilization itself
 
 It does not render the world.  
-It does not add meaning.
+It does not assign meaning.
 
 That happens **one layer above**.
 
@@ -93,26 +93,31 @@ That happens **one layer above**.
 
 ## 🔗 Relationship to Zipvilization
 
-Solumtools has a direct interpretative mirror inside Zipvilization.
+Solumtools has two canonical mirrors:
 
-In Zipvilization:
+- **SolumWorld** — where signals become a coherent, rule-bound world state  
+- **SolumView** — where that world is expressed visually and temporally  
+
+In this process:
 - Wallets become **territories**
 - Holders become **colonists**
 - On-chain mechanics acquire **physical meaning**
 
 ---
 
-## 📐 Technical Specification
+## 📐 Technical Grounding
 
-Solumtools is grounded entirely in the Solum smart contract.
+Solumtools is grounded entirely in **verifiable on-chain data**.
 
-All extracted signals are derived from:
-- Fixed supply
-- Burn mechanics
+All extracted signals derive from:
+- Fixed supply and real burn mechanics
 - Liquidity pool state
-- Treasury flows
+- Treasury inflows
 - Reflection dynamics
-- Transaction and wallet limits
+- Transaction and wallet constraints
+- Historical transaction logs
+
+If a signal cannot be derived on-chain, it does not exist in Solumtools.
 
 ---
 
@@ -121,8 +126,8 @@ All extracted signals are derived from:
 Solumtools sits **between**:
 
 - 🔒 **Solum** — immutable on-chain substrate  
-- 🌍 **Solumworld** — coherent world layer  
-- 🎨 **Solumview** — visual and temporal expression  
+- 🌍 **SolumWorld** — canonical world/state layer  
+- 🎨 **SolumView** — visual and temporal expression  
 
 It does not decide meaning.  
 It makes meaning **possible**.
