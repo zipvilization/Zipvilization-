@@ -2,77 +2,84 @@
 
 This directory contains the **technical components** of Zipvilization.
 
-Everything here is experimental unless explicitly stated otherwise.
+Everything here is **Phase 0 / Chapter 0** unless explicitly stated otherwise.
 
-If something is not present in code, it does not exist operationally.
+If something is not present in `code/`, it does not exist operationally.
 
 ---
 
 ## Purpose
 
-The code layer exists to:
+The Code Layer exists to:
 
-- Define immutable rules when required
-- Provide technical tooling for observation and interpretation
-- Serve as the execution substrate for Zipvilization
+- implement or prototype **execution primitives**
+- define **deterministic boundaries** between on-chain data and readable world state
+- provide tooling for **observation, indexing, and interpretation**
+- make Zipvilization reproducible for auditors (human + AI)
 
-It does not exist to:
-- Optimize outcomes
-- Enforce narratives
-- Guarantee behavior
-- Protect participants from risk
-
----
-
-## Current State
-
-At this stage (Chapter 0):
-
-- Some components are **draft**
-- Some components are **paused**
-- Nothing here should be considered deployed or active unless explicitly marked
-
-This repository reflects **work in progress**, not a live system.
+It does **not** exist to:
+- optimize outcomes
+- enforce narratives
+- guarantee behavior
+- protect participants from market risk
 
 ---
 
-## Structure
+## Current State (Chapter 0)
 
-Typical subdirectories may include:
+At this stage:
 
-- `token/`  
-  On-chain economic primitives (draft / paused)
+- components are **scaffolding**
+- some parts are **stubs by design**
+- nothing should be interpreted as “live” unless explicitly marked
 
-- `tools/`  
-  Off-chain utilities for data collection or interpretation
-
-- `scripts/`  
-  Deployment or testing helpers (non-production)
-
-The presence of code does not imply readiness.
+This repository reflects **work in progress**, not a deployed system.
 
 ---
 
-## On-Chain Components
+## Repository Structure (Actual)
 
-Any smart contract present in this directory:
+These are the current Phase 0 anchors in this repo:
 
-- Is not deployed by default
-- Has no authority until deployed
-- Is subject to revision, pause, or removal during Chapter 0
+- `indexer/`  
+  Off-chain ingestion / indexing scaffolding.  
+  Reads on-chain events and produces reproducible, queryable data surfaces.
 
-No assumptions should be made based solely on code availability.
+- `world/`  
+  SolumWorld execution scaffolding.  
+  Deterministic rules for converting raw signals → coherent world state.
+
+- `map/` *(temporary name)*  
+  SolumView scaffolding (visual / UX layer).  
+  **Planned rename:** `map/` → `solumview/` once the folder contains multiple canonical files.
+
+- `shared/`  
+  Shared types, contracts, schemas, and boundary definitions used across layers.
+
+If a folder is not listed here, assume it is not part of the current Phase 0 plan.
 
 ---
 
-## Testing and Tooling
+## On-chain Components
 
-Testing, CI, and automation may exist in various states of completeness.
+Smart contracts (when present in `code/`):
+
+- are not deployed by default
+- have no authority until deployed
+- may change during Chapter 0
+
+No assumptions should be made based solely on the presence of code.
+
+---
+
+## Testing and Automation
+
+CI, tests, and automation may exist in incomplete form.
 
 They are used internally to:
-- Validate assumptions
-- Detect inconsistencies
-- Explore failure modes
+- validate assumptions
+- detect inconsistencies
+- explore failure modes
 
 They do not imply guarantees of correctness.
 
@@ -80,11 +87,12 @@ They do not imply guarantees of correctness.
 
 ## Final Note
 
-Zipvilization is not defined by its code alone.
+Zipvilization is not defined by code alone.
 
-Code is a necessary component, but not a promise.
+Code is necessary, but not a promise.
 
 If a component becomes canonical, it will be clearly documented as such.
+Until then, read this directory as:
 
-Until then, this directory should be read as:
 **experimentation in public, without commitment**.
+```0
