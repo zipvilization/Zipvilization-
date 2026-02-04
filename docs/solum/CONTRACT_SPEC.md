@@ -386,7 +386,54 @@ LP tokens are typically minted to a specific recipient (often `owner`), enabling
 
 ---
 
-## 12) Exemptions (fees & limits)
+## 12) Launch Access Controls (Whitelist + Buy Cooldown, Phase-0 Only)
+
+These rules exist **only to stabilize the first 48 hours** after trading is enabled.
+
+They are designed to:
+- prevent rapid buy-looping during the most hostile phase,
+- provide a short, explicit preference window to an early-access set,
+- keep the privilege limited to **MAX_TX only** (not MAX_WALLET),
+- keep sells always possible (no exit restrictions).
+
+### 12.1 Launch window duration (48h)
+
+- The contract defines a launch window starting at the moment trading is enabled.
+- For the first **48 hours**, extra buy rules apply.
+- After the window expires, these extra buy rules are inactive.
+
+### 12.2 Whitelist preference window (first 60 minutes)
+
+- For the first **60 minutes** after trading is enabled:
+  - only **whitelisted** addresses are allowed to buy from the pool (pair).
+  - buys are still capped by `MAX_TX_AMOUNT`.
+- This is a preference window, not a special allocation.
+
+### 12.3 Per-wallet buy cooldown (60 minutes)
+
+During the same 48h launch window:
+
+- A wallet may execute a buy (from the pair) **at most once per 60 minutes**.
+- This applies to:
+  - whitelisted wallets during the first hour
+  - all wallets after the first hour (public phase)
+
+Cooldown rules apply **only to buys**.
+Sells and normal transfers are not blocked by cooldown.
+
+> Canonical intent: “buy privilege = time to enter once”, not “ability to accumulate”.
+
+### 12.4 Max buy = MAX_TX (no special maxWallet)
+
+Whitelist preference does not bypass:
+- `MAX_TX_AMOUNT` (it is the *only* allowed purchase size for fair entry; equal or lower).
+
+Whitelist preference does not change:
+- `MAX_WALLET` rules (still enforced).
+
+---
+
+## 13) Exemptions (fees & limits)
 
 ```solidity
 mapping(address => bool) public isFeeExempt;
@@ -404,7 +451,7 @@ function setLimitExempt(address account, bool exempt) external onlyOwner;
 
 ---
 
-## 13) Ownership
+## 14) Ownership
 
 A minimal Ownable pattern is embedded:
 - `owner`
@@ -413,7 +460,7 @@ A minimal Ownable pattern is embedded:
 
 ---
 
-## 14) Events (Audit Trace)
+## 15) Events (Audit Trace)
 
 Core events include:
 - ERC20: `Transfer`, `Approval`
@@ -423,9 +470,13 @@ Core events include:
 - Fee governance: `*FeeProposed`, `*FeeApplied`, `*FeeFrozen`
 - Ownership: `OwnershipTransferred`
 
+If launch access controls have explicit events (recommended):
+- whitelist updates (address added/removed)
+- launch window parameters (if configurable at deploy)
+
 ---
 
-## 15) ETH handling
+## 16) ETH handling
 
 The contract can receive ETH (swap proceeds / liquidity operations):
 
@@ -435,7 +486,7 @@ receive() external payable {}
 
 ---
 
-## 16) What can change vs what cannot
+## 17) What can change vs what cannot
 
 ### Immutable / cannot increase
 - Supply cannot increase (no mint).
@@ -447,10 +498,11 @@ receive() external payable {}
 - SwapBack parameters: bounded by guardrails.
 - Treasury: timelocked change.
 - Exemption lists: owner-controlled.
+- Launch access controls: fixed Phase-0 posture (48h window, 60m whitelist preference, 60m cooldown) unless explicitly coded otherwise.
 
 ---
 
-## 17) Zipvilization interpretation (no denial of blockchain reality)
+## 18) Zipvilization interpretation (no denial of blockchain reality)
 
 - On-chain: holders, transfers, market activity are real.
 - Zipvilization layer: holders are interpreted as colonists; balances as territory.
