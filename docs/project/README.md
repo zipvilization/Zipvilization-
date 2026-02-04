@@ -2,137 +2,158 @@
 
 This folder defines the **foundational posture** of Zipvilization.
 
-It does not describe how the system is implemented.  
-It describes **why it exists**, **how it begins**, and **how it relates to its participants**.
+It does not describe how the system is implemented.
+It defines **why the project exists**, **how it enters reality**, and **under which constraints it operates**.
 
 Everything here is **canonical**, **public**, and **intentional**.
 
----
-
-## 📂 What This Folder Contains
-
-The `project` folder gathers documents that define:
-
-- the origin of Zipvilization  
-- the conditions of its birth  
-- the logic behind its launch  
-- the role of early participants  
-- the project’s stance on communication and community  
-- the explicit assumptions under which the system exists  
-- the security posture of the experiment  
-
-These documents are not speculative.  
-They are statements of intent.
+If something is not stated in this folder,  
+it must not be assumed elsewhere.
 
 ---
 
-## 🧬 LORE_GENESIS.md — Origin
+## 📂 What This Folder Is
 
-**What it answers:**
-- What is a civilization in Zipvilization?
-- Where does it exist?
-- How does a world emerge from an abstract substrate?
+The `project` folder contains the documents that define:
 
-This document establishes:
-- the non-physical nature of the world
-- the absence of characters at the beginning
-- the idea that territory, history, and civilization emerge *after* activity
+- the origin of Zipvilization
+- the conditions of its birth
+- the logic of its launch
+- the role of early participants
+- the limits under which the project operates
+- the posture toward communication, trust, and responsibility
 
-Lore here is not fantasy.  
-It is interpretation of reality.
+This folder exists **before code**.
 
----
-
-## 🚀 TOKEN_LAUNCH.md — Birth Conditions
-
-**What it answers:**
-- How does Solum enter existence?
-- Where is it launched?
-- Why is initial access almost free?
-
-This document defines:
-- the launch environment (Base network, Aerodrome pool)
-- the absence of a fixed launch date
-- the rationale behind full-supply pool seeding
-- the mechanical accessibility of early participation
-
-Token Launch is not an event.  
-It is a transition from potential to existence.
+It is the layer where intent is fixed
+so that implementation cannot drift.
 
 ---
 
-## 🔓 EARLY_ACCESS.md — First Participation
+## 🧬 Origin — *What kind of world is this?*
 
-**What it answers:**
-- Why early access exists
-- Who it is for
-- What it does *and does not* promise
+### `LORE_GENESIS.md`
 
-This document explains:
-- why randomness at birth is dangerous
-- the role of early colonists
-- why understanding matters more than speed
+This document defines the **foundational narrative frame** of Zipvilization.
+
+It answers:
+- what “civilization” means in this context
+- where this world exists
+- how territory and history emerge from abstract activity
+
+There are no characters at the beginning.
+There is no fiction imposed.
+
+Lore here is **interpretation of reality**, not fantasy.
+
+---
+
+## 🚀 Birth — *How does the system enter reality?*
+
+### `TOKEN_LAUNCH.md`
+
+This document defines the **conditions of existence** for Solum.
+
+It explains:
+- where the token is launched
+- why there is no fixed launch date
+- why initial access is mechanically cheap
+- how the first moments are structured to reduce distortion
+
+Token Launch is not a marketing event.
+It is the transition from potential to execution.
+
+---
+
+## 🔓 First Participation — *Who enters first, and why?*
+
+### `EARLY_ACCESS.md`
+
+This document defines the **early participation phase**.
+
+It explains:
+- why uncontrolled randomness at birth is dangerous
+- why early understanding matters more than speed
 - why the mechanism is intentionally not finalized yet
 
-Early Access is a structural phase, not a reward.
+Early Access is not a reward.
+It is a structural stabilizer.
 
 ---
 
-## 📡 COMMUNICATION.md — Posture & Channels
+## 🔐 Limits & Responsibility — *What is explicitly assumed and protected?*
 
-**What it answers:**
-- How Zipvilization communicates
-- Why it avoids real-time community platforms
-- What role GitHub, X, Medium, and the website play
+### `ASSUMPTIONS.md`
 
-This document clarifies:
-- why absence of Discord/Telegram is intentional
+This document lists the **explicit assumptions** under which Zipvilization operates.
+
+It defines:
+- what the project assumes about users, markets, and environments
+- what it does *not* attempt to solve or guarantee
+
+Nothing outside these assumptions is implied.
+
+---
+
+### `SECURITY.md`
+
+This document defines the **security posture** of the project.
+
+It clarifies:
+- what is protected by design
+- what is intentionally left unprotected
+- why no system-level guarantees are claimed
+
+Security here is about **honesty of scope**, not absolute safety.
+
+---
+
+## 🏛️ Resources — *How does the project sustain itself?*
+
+### `TREASURY.md`
+
+This document defines the **role of the treasury**.
+
+It explains:
+- why the project starts with minimal economic investment
+- why access for colonists is almost free
+- why resources are still required to grow
+
+It makes explicit that:
+- the human factor has no special privilege
+- no speculative advantage is claimed
+- funds exist to sustain development, not extract value
+
+---
+
+## 🧾 After Launch — *What guarantees follow existence?*
+
+### `POST_LAUNCH_GUARANTEES.md`
+
+This document defines the **post-launch commitments**.
+
+It covers:
+- liquidity handling principles
+- ownership and control posture
+- transparency about future decisions
+
+It does not promise outcomes.
+It commits to **explicit decision-making**.
+
+---
+
+## 📡 Communication — *How meaning is shared*
+
+### `COMMUNICATION.md`
+
+This document defines the **communication posture** of Zipvilization.
+
+It explains:
+- why there is no Discord or Telegram
 - why GitHub is the canonical source of truth
-- why other platforms are explanatory, not authoritative
-- how enthusiasm is expressed without hype
+- why other platforms exist for explanation, not authority
 
-Communication exists to explain, not to negotiate reality.
-
----
-
-## 🔐 SECURITY.md — Security Posture
-
-**What it answers:**
-- What “security” means in Zipvilization
-- What it explicitly does *not* mean
-- Where responsibility begins and ends
-
-This document establishes that security in Zipvilization is about:
-- immutability of rules
-- equality of execution
-- auditability of logic
-- resistance to discretionary intervention
-
-Security here does not imply:
-- protection of value
-- prevention of loss
-- guarantees of outcome
-
-Zipvilization is secure in **execution**, not in **results**.
-
----
-
-## 🧠 ASSUMPTIONS.md — System Premises
-
-**What it answers:**
-- Under which assumptions Zipvilization exists
-- What is taken as given
-- What is intentionally *not* corrected or optimized
-
-This document makes explicit that:
-- markets are chaotic
-- behavior is unpredictable
-- failure is possible
-- participation is asymmetric
-- interpretation does not imply endorsement
-
-Assumptions are not hidden risks.  
-They are part of the system itself.
+Communication exists to **clarify**, not to negotiate reality.
 
 ---
 
@@ -140,18 +161,19 @@ They are part of the system itself.
 
 These files define the **conditions of existence**:
 
-- Lore defines *what kind of world* this is  
-- Token Launch defines *how it enters reality*  
-- Early Access defines *how participation begins*  
-- Communication defines *how meaning is shared*  
-- Assumptions define *what is taken as given*  
-- Security defines *what is protected and what is not*  
+- Lore defines the nature of the world
+- Token Launch defines how it begins
+- Early Access defines how participation starts
+- Assumptions and Security define limits
+- Treasury defines sustainability
+- Post-launch guarantees define honesty over time
+- Communication defines how meaning is transmitted
 
 They precede:
 - Solum (contract)
 - Solumtools (interpretation)
-- SolumWorld (world coherence)
-- SolumView (visual experience)
+- SolumWorld (coherence)
+- SolumView (visibility)
 
 Without this folder, everything else lacks context.
 
@@ -165,8 +187,8 @@ All documents in this folder are:
 - auditable
 - binding at the level of intent
 
-If something is not stated here,  
-it is not assumed.
+If something is not stated here,
+it is not part of the project’s promise.
 
 ---
 
@@ -174,13 +196,13 @@ it is not assumed.
 
 This folder does not describe features.
 
-It describes **responsibility**.
+It defines **responsibility**.
 
-Before code runs,  
-before tokens move,  
+Before code executes,
+before tokens move,
 before the world becomes visible,
 
 the project must know  
-*what it is doing* and *why*.
+**what it is doing** and **why**.
 
 This is that place.
