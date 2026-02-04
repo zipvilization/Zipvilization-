@@ -1,30 +1,97 @@
-# Testing (Foundry)
+# ✅ Testing (Foundry) — Solum Contract
 
-This folder includes a Foundry test suite for `SolumToken.sol`.
+This folder contains the canonical Solum contract and its Foundry test suite.
 
-## Requirements
-- Foundry (forge)
+This repository is **Zipvilization-only**:
+- If it is not in this repository, it is not part of the canonical build.
+- If it is not deployed, it does not exist operationally.
 
-## Install test dependency (local, not committed)
-From this folder:
+---
 
-cd code/token/contract
-forge install foundry-rs/forge-std --no-commit
+## 📦 Requirements
 
-## Run tests
-forge test -vv
+- Foundry (forge/cast/anvil)
+- Git
 
-More verbosity:
-forge test -vvvv
+Install Foundry:
+https://book.getfoundry.sh/getting-started/installation
 
-## What is covered
-The test suite validates:
+Verify:
+forge --version
 
-- Real burn on sells reduces totalSupply by the expected burn amount
-- Reflection increases passive holder balances after taxed sells
-- swapBack triggers on sells and pays ETH to the treasury (using mocks)
-- freezeConfig() (Option A) prevents further config/exemption edits
+---
 
-## Notes
-- Router and pair are mocked for deterministic testing.
-- A real Base/Aerodrome fork test can be added later to validate router compatibility on-chain.
+## 📁 Project layout (reality)
+
+- src/Solum.sol → canonical contract
+- test/SolumToken.t.sol → canonical tests
+- test/mocks/* → minimal mocks for router/pair where needed
+- foundry.toml → Foundry config
+
+---
+
+## 🧩 Dependencies (forge-std)
+
+This repo uses forge-std for testing utilities.
+
+Option A (recommended for local dev): install it
+From code/token/contract:
+
+forge install foundry-rs/forge-std
+
+Note:
+forge install may create git changes inside lib/.
+If you do not want to commit vendor code locally, you can discard those changes after the install:
+git checkout -- lib
+
+Option B (CI-friendly):
+GitHub Actions installs dependencies as part of the workflow, so locally you only need them if you run tests on your machine.
+
+---
+
+## 🏗️ Build
+
+From code/token/contract:
+
+forge build -vvv
+
+---
+
+## 🧪 Run tests
+
+From code/token/contract:
+
+forge test -vvv
+
+To re-run only failing tests:
+forge test --rerun -vvv
+
+---
+
+## ✅ What tests are verifying
+
+The canonical tests are intentionally minimal but meaningful:
+
+- initial supply assigned to deployer
+- pre-trading gate blocks non-exempt transfers
+- enableTrading() is owner-only
+- wallet-to-wallet transfer fee and burn behavior is validated with reflection-aware tolerance
+
+These tests do not attempt to simulate full DEX execution.
+They avoid fragile assumptions and focus on what must remain true.
+
+---
+
+## 🔍 Common issues
+
+1) Identifier not found for the contract in tests  
+If tests reference the wrong contract name, ensure imports match:
+- ../src/Solum.sol
+- contract type is Solum (not SolumToken)
+
+2) Rounding under reflection  
+Reflection introduces integer-division effects. Tests must allow minimal rounding tolerance where applicable.
+
+3) CI failures during dependency install  
+Do not use deprecated flags like forge install --no-commit.
+Use plain forge install in CI and set git identity when needed.
