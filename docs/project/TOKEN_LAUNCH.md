@@ -1,183 +1,183 @@
-# 🧬 Token Launch — How Access to Zipvilization Begins
+# 🚀 TOKEN_LAUNCH — Canonical Birth Conditions
 
-## What Token Launch Means Here
+This document defines **how Solum enters existence**.
 
-In Zipvilization, *Token Launch* is not a promotional event.
+It does not describe marketing.
+It does not announce dates.
+It does not promise outcomes.
 
-It is the moment when access to the system becomes possible.
-
-There is no countdown.  
-There is no announcement rush.  
-There is no attempt to impress.
-
-The launch simply opens the door.
+It defines the **mechanical, auditable conditions** under which
+the Zipvilization experiment begins.
 
 ---
 
-## 🌍 Where Solum Is Launched
+## 🌐 Where the Launch Happens
 
-Solum will be launched on:
+Solum is launched **exclusively** on:
 
-- **Base network**
-- **Aerodrome (V2-style liquidity pool)**
+- **Network:** Base
+- **DEX:** Aerodrome (V2-style pool)
 
-There will be **one public pool**, created directly on-chain.
+There is no multi-chain launch.
+There is no alternative pool.
+There is no secondary genesis.
 
-No private allocations.  
-No early price deals.  
-No privileged liquidity.
-
-If you access Solum, you do it the same way as everyone else.
-
----
-
-## 🧱 How the Pool Is Created
-
-At launch:
-
-- **100% of the Solum supply** is placed in the liquidity pool  
-- The counter asset is **ETH (Base)**  
-- The ETH side of the pool is intentionally small  
-  (around **100€ equivalent** at launch)
-
-This is not an oversight.  
-It is the result of design and simulation.
-
----
-
-## 💡 Why Access Is Almost Free
-
-Solum’s launch parameters have been **simulated extensively**.
-
-The objective was not price discovery,  
-but **wide, fair, early access**.
-
-Because:
-- the full supply is in the pool
-- the initial ETH is very small
-- and there is a **maximum transaction size**
-
-the result is predictable:
-
-**Thousands of early accesses can happen at negligible cost.**
-
-In simulations:
-- using the **maximum allowed transaction** (10,000,000,000 Solum)
-- the first **several thousand participants**
-- could access Solum for **well under 1€ / $1** (plus gas)
-
-Even deep into the sequence (around the ~9,000th access),
-the cost remained extremely low.
-
-This is not a promise of value.  
-It is a consequence of math.
-
----
-
-## 🧭 What This Means in Practice
-
-- Solum is not “sold” by the project  
-- There is no fixed price  
-- There is no privileged entry point  
-
-Access is:
-- public
-- mechanical
-- rule-based
-
-The system does not care who you are.  
-It only executes.
-
----
-
-## 🧠 Why This Design Exists
-
-Zipvilization needs **density**, not valuation.
-
-It needs:
-- many territories
-- many colonists
-- varied behavior
-- real movement
-
-An expensive launch would concentrate access.  
-A cheap launch distributes it.
-
-This is essential for the experiment.
+If Solum does not exist in this environment,
+it does not exist at all.
 
 ---
 
 ## ⏳ No Fixed Launch Date
 
-There is **no scheduled launch date**.
+There is **no predetermined launch date**.
 
-The token will be launched only when:
-- contracts are final
-- documentation is complete
-- the system can be audited and criticized
-- an initial community understands what this is — and what it is not
+The pool will be created only when:
 
-Speed adds nothing here.  
-Clarity does.
+- the contract is final
+- the documentation is complete
+- the mechanics are publicly auditable
+- early participants have had time to understand and critique the system
 
----
-
-## 👥 Community Before Activation
-
-Before launch, Zipvilization focuses on:
-- explaining itself
-- being challenged
-- being understood
-
-This phase exists so that:
-- early participants are not accidental
-- first data is meaningful
-- the system does not start distorted
-
-This is directly related to **Early Access**.
+Speed is not a goal.
+Correctness is.
 
 ---
 
-## 🔓 Relationship to Early Access
+## 💧 Full-Supply Pool Seeding
 
-Early Access does **not** mean:
-- guaranteed allocation
-- free tokens
-- special prices
+At launch, **100% of the Solum supply** is seeded into the pool.
 
-It means:
-- early understanding
-- early presence
-- early contribution to clarity
+The initial liquidity is intentionally minimal
+(approximately 100€ worth of ETH, adjusted at launch time).
 
-The exact mechanics are still being evaluated  
-(using existing whitelist and access tools).
+This design choice is deliberate.
 
-When defined, they will be documented here.
+### Why this matters
 
----
+- There is no artificial scarcity at genesis
+- There is no privileged pre-allocation
+- Price discovery is emergent, not engineered
+- Access is mechanical, not discretionary
 
-## 🔍 Transparency & Auditability
+The result is an entry condition where
+**participation is structurally inexpensive**, not selectively granted.
 
-Everything about Token Launch is:
-- documented in GitHub
-- visible before execution
-- verifiable on-chain after execution
-
-If something is not written here,  
-it should be assumed **not to exist**.
+Early access is not free — it is *mechanically accessible*.
 
 ---
 
-## 🧩 In Short
+## 🧱 The Protected Launch Phase (First 48 Hours)
 
-Token Launch in Zipvilization is:
+The first 48 hours after trading is enabled
+are treated as the **most fragile phase** of the system.
 
-- minimal  
-- accessible  
-- deliberately unexciting  
-- structurally fair  
+During this period, **additional protections apply**.
 
-It does not try to impress.
+These protections are **on-chain rules**, not policies.
 
-It simply makes the world reachable.
+---
+
+## 🛒 Buy-Side Restrictions (48h Only)
+
+During the protected phase:
+
+- **Only BUY transactions are restricted**
+- **SELL transactions are always allowed**
+- **Transfers remain unrestricted**
+
+### Buy constraints:
+- Maximum per buy: **MAX_TX**
+- Cooldown per wallet: **60 minutes**
+- Cooldown applies only to BUY actions
+
+This ensures:
+- no rapid accumulation
+- no high-frequency dominance
+- equal temporal access per wallet
+
+Participation is paced.
+Not blocked.
+
+---
+
+## 🔓 Whitelist Priority Access (First 60 Minutes)
+
+Within the protected phase, an additional rule applies:
+
+- **Whitelisted wallets** have **priority access** during the **first 60 minutes**
+- This priority does **not** change:
+  - max transaction size
+  - cooldown rules
+  - wallet limits
+
+Whitelist access means:
+- the right to participate early
+- **not** the right to accumulate more
+
+This distinction is fundamental.
+
+---
+
+## 🧭 After the Protected Phase
+
+Once the first 48 hours pass:
+
+- buy cooldowns are removed
+- launch-specific restrictions expire
+- the contract behaves according to its permanent rules
+
+Nothing is toggled manually.
+Nothing is extended.
+Nothing is negotiated.
+
+Time alone resolves the phase.
+
+---
+
+## ⚖️ Design Rationale
+
+These mechanics exist to protect:
+
+- early coherence
+- observational clarity
+- resistance to launch chaos
+- meaningful initial participation
+
+They are not defensive measures.
+They are **structural constraints**.
+
+They do not favor insiders.
+They do not punish activity.
+
+They enforce **temporal fairness**.
+
+---
+
+## 🔒 Canonical Status
+
+All rules described here:
+
+- are implemented on-chain
+- are enforced automatically
+- are time-bound
+- are publicly auditable
+
+If a behavior is not allowed by the contract,
+it does not exist during launch.
+
+If a rule is not described here,
+it should not be assumed.
+
+---
+
+## 📌 Final Note
+
+Token Launch is not an event.
+
+It is the moment when:
+- abstract rules begin producing history
+- territory becomes measurable
+- participation becomes visible
+
+Nothing more.
+Nothing less.
