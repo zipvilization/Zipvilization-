@@ -10,11 +10,11 @@ import "./mocks/MockPair.sol";
  * @notice Launch Rules test suite (Phase-0 only) — SECONDARY SUITE.
  *
  * This suite exists to validate the same launch rules with an independent test contract.
- * Key rule for test stability:
- * - NEVER use absolute timestamps in vm.warp(x) unless x is monotonic and understood.
- * - Prefer vm.warp(block.timestamp + delta) to avoid time going backwards.
+ * We intentionally make warps deterministic:
+ * - store timestamps at critical actions (e.g., first buy)
+ * - warp to (storedTime + delta) to avoid any accidental reuse of absolute time
  *
- * We test the canonical launch protections added to Solum:
+ * Rules tested:
  * - First 60 minutes after enableTrading(): ONLY whitelisted wallets can BUY (from pair).
  * - First 48 hours after enableTrading(): per-wallet buy cooldown applies (BUYS only).
  * - After 48 hours: launch buy rules are inactive (no whitelist gate, no cooldown gate).
@@ -25,7 +25,6 @@ import "./mocks/MockPair.sol";
  * To simulate buys, we fund `pair` with tokens and then prank transfers from `pair` to users.
  */
 contract SolumTokenLaunch2Test is Test {
-    // Canonical WETH on Base (valid EVM address; it doesn't need to exist on local VM)
     address internal constant BASE_WETH =
         0x4200000000000000000000000000000000000006;
 
@@ -50,10 +49,9 @@ contract SolumTokenLaunch2Test is Test {
         router = new MockDexV2Router(BASE_WETH);
         pair = new MockPair();
 
-        // Solum constructor in this repo: (router, pair, treasury)
         token = new Solum(address(router), address(pair), treasury);
 
-        // Enable trading to start launch window and timestamp.
+        // Start launch window.
         token.enableTrading();
 
         // Fund pair so it can simulate buys (pair -> user).
@@ -61,12 +59,10 @@ contract SolumTokenLaunch2Test is Test {
     }
 
     function testWhitelistOnlyBuysDuringFirstHour() public {
-        // During whitelist window, non-whitelisted buys must revert.
         vm.prank(address(pair));
         vm.expectRevert("WHITELIST_ONLY");
         token.transfer(bob, 10 ether);
 
-        // Whitelist alice, then buy should succeed.
         token.setWhitelist(alice, true);
 
         vm.prank(address(pair));
@@ -78,17 +74,16 @@ contract SolumTokenLaunch2Test is Test {
     function testBuyCooldownAppliesDuringFirst48h() public {
         token.setWhitelist(alice, true);
 
-        // First buy succeeds.
         vm.prank(address(pair));
         token.transfer(alice, 10 ether);
 
-        // Second buy immediately must revert due to cooldown (BUYS only).
         vm.prank(address(pair));
         vm.expectRevert("BUY_COOLDOWN");
         token.transfer(alice, 1 ether);
 
-        // After 60 minutes (+1s buffer for strict cooldown checks), buy should succeed again.
-        vm.warp(block.timestamp + 60 minutes + 1);
+        // Warp strictly past cooldown boundary (deterministic +1s).
+        uint256 firstBuyTime = block.timestamp;
+        vm.warp(firstBuyTime + 60 minutes + 1);
 
         vm.prank(address(pair));
         token.transfer(alice, 1 ether);
@@ -98,19 +93,23 @@ contract SolumTokenLaunch2Test is Test {
 
     function testPublicBuysAllowedAfterFirstHourButCooldownStillActiveUntil48h() public {
         // Move time forward past whitelist window (60 min) but still inside 48h.
-        vm.warp(block.timestamp + 60 minutes + 1);
+        uint256 tStart = block.timestamp;
+        vm.warp(tStart + 60 minutes + 1);
 
         // bob is NOT whitelisted, but should be allowed to buy now (public phase).
         vm.prank(address(pair));
         token.transfer(bob, 10 ether);
+
+        // Capture exact time of the first buy (cooldown anchor).
+        uint256 firstBuyTime = block.timestamp;
 
         // Immediate second buy should hit cooldown.
         vm.prank(address(pair));
         vm.expectRevert("BUY_COOLDOWN");
         token.transfer(bob, 1 ether);
 
-        // After cooldown (+1s buffer for strict cooldown checks), second buy should pass.
-        vm.warp(block.timestamp + 60 minutes + 1);
+        // Warp strictly past cooldown boundary (deterministic +1s).
+        vm.warp(firstBuyTime + 60 minutes + 1);
 
         vm.prank(address(pair));
         token.transfer(bob, 1 ether);
@@ -119,10 +118,8 @@ contract SolumTokenLaunch2Test is Test {
     }
 
     function testLaunchRulesExpireAfter48h() public {
-        // Move time forward beyond 48 hours (launch buy rules duration).
         vm.warp(block.timestamp + 48 hours + 1);
 
-        // Not whitelisted: should still be allowed to buy.
         vm.prank(address(pair));
         token.transfer(bob, 10 ether);
 
@@ -134,14 +131,11 @@ contract SolumTokenLaunch2Test is Test {
     }
 
     function testSellsAreNeverBlockedByLaunchRules() public {
-        // Stay inside whitelist window (default right after enableTrading()).
         token.setWhitelist(alice, true);
 
-        // Buy for alice (pair -> alice).
         vm.prank(address(pair));
         token.transfer(alice, 10 ether);
 
-        // Sell for alice (alice -> pair) must NOT be blocked by whitelist/cooldown rules.
         vm.prank(alice);
         token.transfer(address(pair), 1 ether);
 
