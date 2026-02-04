@@ -2,7 +2,7 @@
 
 This folder defines the **foundational posture** of Zipvilization.
 
-It does not describe how the system is implemented.
+It does not describe how the system is implemented.  
 It describes **why it exists**, **how it begins**, and **how it relates to its participants**.
 
 Everything here is **canonical**, **public**, and **intentional**.
@@ -13,13 +13,15 @@ Everything here is **canonical**, **public**, and **intentional**.
 
 The `project` folder gathers documents that define:
 
-- the origin of Zipvilization
-- the conditions of its birth
-- the logic behind its launch
-- the role of early participants
-- the project’s stance on communication and community
+- the origin of Zipvilization  
+- the conditions of its birth  
+- the logic behind its launch  
+- the role of early participants  
+- the project’s stance on communication and community  
+- the explicit assumptions under which the system exists  
+- the security posture of the experiment  
 
-These documents are not speculative.
+These documents are not speculative.  
 They are statements of intent.
 
 ---
@@ -36,7 +38,7 @@ This document establishes:
 - the absence of characters at the beginning
 - the idea that territory, history, and civilization emerge *after* activity
 
-Lore here is not fantasy.
+Lore here is not fantasy.  
 It is interpretation of reality.
 
 ---
@@ -54,7 +56,7 @@ This document defines:
 - the rationale behind full-supply pool seeding
 - the mechanical accessibility of early participation
 
-Token Launch is not an event.
+Token Launch is not an event.  
 It is a transition from potential to existence.
 
 ---
@@ -93,14 +95,57 @@ Communication exists to explain, not to negotiate reality.
 
 ---
 
+## 🔐 SECURITY.md — Security Posture
+
+**What it answers:**
+- What “security” means in Zipvilization
+- What it explicitly does *not* mean
+- Where responsibility begins and ends
+
+This document establishes that security in Zipvilization is about:
+- immutability of rules
+- equality of execution
+- auditability of logic
+- resistance to discretionary intervention
+
+Security here does not imply:
+- protection of value
+- prevention of loss
+- guarantees of outcome
+
+Zipvilization is secure in **execution**, not in **results**.
+
+---
+
+## 🧠 ASSUMPTIONS.md — System Premises
+
+**What it answers:**
+- Under which assumptions Zipvilization exists
+- What is taken as given
+- What is intentionally *not* corrected or optimized
+
+This document makes explicit that:
+- markets are chaotic
+- behavior is unpredictable
+- failure is possible
+- participation is asymmetric
+- interpretation does not imply endorsement
+
+Assumptions are not hidden risks.  
+They are part of the system itself.
+
+---
+
 ## 🧱 How These Documents Work Together
 
 These files define the **conditions of existence**:
 
-- Lore defines *what kind of world* this is
-- Token Launch defines *how it enters reality*
-- Early Access defines *how participation begins*
-- Communication defines *how meaning is shared*
+- Lore defines *what kind of world* this is  
+- Token Launch defines *how it enters reality*  
+- Early Access defines *how participation begins*  
+- Communication defines *how meaning is shared*  
+- Assumptions define *what is taken as given*  
+- Security defines *what is protected and what is not*  
 
 They precede:
 - Solum (contract)
@@ -120,7 +165,7 @@ All documents in this folder are:
 - auditable
 - binding at the level of intent
 
-If something is not stated here,
+If something is not stated here,  
 it is not assumed.
 
 ---
@@ -131,11 +176,11 @@ This folder does not describe features.
 
 It describes **responsibility**.
 
-Before code runs,
-before tokens move,
+Before code runs,  
+before tokens move,  
 before the world becomes visible,
 
-the project must know
+the project must know  
 *what it is doing* and *why*.
 
 This is that place.
