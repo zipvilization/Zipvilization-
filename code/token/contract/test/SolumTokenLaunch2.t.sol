@@ -7,7 +7,12 @@ import "./mocks/MockDexV2Router.sol";
 import "./mocks/MockPair.sol";
 
 /**
- * @notice Launch Rules test suite (Phase-0 only).
+ * @notice Launch Rules test suite (Phase-0 only) — SECONDARY SUITE.
+ *
+ * This suite exists to validate the same launch rules with an independent test contract.
+ * Key rule for test stability:
+ * - NEVER use absolute timestamps in vm.warp(x) unless x is monotonic and understood.
+ * - Prefer vm.warp(block.timestamp + delta) to avoid time going backwards.
  *
  * We test the canonical launch protections added to Solum:
  * - First 60 minutes after enableTrading(): ONLY whitelisted wallets can BUY (from pair).
@@ -19,7 +24,7 @@ import "./mocks/MockPair.sol";
  * A "BUY" is detected as `from == pair`.
  * To simulate buys, we fund `pair` with tokens and then prank transfers from `pair` to users.
  */
-contract SolumTokenLaunchTest is Test {
+contract SolumTokenLaunch2Test is Test {
     // Canonical WETH on Base (valid EVM address; it doesn't need to exist on local VM)
     address internal constant BASE_WETH =
         0x4200000000000000000000000000000000000006;
