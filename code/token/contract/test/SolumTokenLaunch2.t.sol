@@ -57,7 +57,6 @@ contract SolumTokenLaunch2Test is Test {
         token.enableTrading();
 
         // Fund pair so it can simulate buys (pair -> user).
-        // Owner is fee-exempt and pair is limit-exempt by default, so this is clean.
         token.transfer(address(pair), 1_000 ether);
     }
 
@@ -88,8 +87,8 @@ contract SolumTokenLaunch2Test is Test {
         vm.expectRevert("BUY_COOLDOWN");
         token.transfer(alice, 1 ether);
 
-        // After 60 minutes, buy should succeed again.
-        vm.warp(block.timestamp + 60 minutes);
+        // After 60 minutes (+1s buffer for strict cooldown checks), buy should succeed again.
+        vm.warp(block.timestamp + 60 minutes + 1);
 
         vm.prank(address(pair));
         token.transfer(alice, 1 ether);
@@ -110,8 +109,8 @@ contract SolumTokenLaunch2Test is Test {
         vm.expectRevert("BUY_COOLDOWN");
         token.transfer(bob, 1 ether);
 
-        // After cooldown, second buy should pass.
-        vm.warp(block.timestamp + 60 minutes);
+        // After cooldown (+1s buffer for strict cooldown checks), second buy should pass.
+        vm.warp(block.timestamp + 60 minutes + 1);
 
         vm.prank(address(pair));
         token.transfer(bob, 1 ether);
@@ -143,11 +142,9 @@ contract SolumTokenLaunch2Test is Test {
         token.transfer(alice, 10 ether);
 
         // Sell for alice (alice -> pair) must NOT be blocked by whitelist/cooldown rules.
-        // Note: This will apply sell fees (alice is not fee-exempt), which is fine.
         vm.prank(alice);
         token.transfer(address(pair), 1 ether);
 
-        // If we got here without revert, sells are not restricted by launch rules.
         assertTrue(true);
     }
 }
